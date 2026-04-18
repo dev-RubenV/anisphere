@@ -1,0 +1,58 @@
+import { NextResponse } from "next/server";
+import clientPromise from "@/lib/mongodb";
+import bcrypt from "bcryptjs";
+import { cookies } from "next/headers";
+
+export async function POST(request) {
+    try {
+        const { email, password, displayName } = await request.json();
+
+        if (!email || !displayName || !password || password.length < 6) {
+            return NextResponse.json({ error: "Dados inválidos" }, { status: 400 });
+        }
+
+        const client = await clientPromise;
+        const db = client.db("anilog");
+
+        // Verifica duplicados
+        const existingUser = await db.collection("users").findOne({ email: email.toLowerCase() });
+        if (existingUser) {
+            return NextResponse.json({ error: "Email já registado" }, { status: 400 });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 12);
+
+        const result = await db.collection("users").insertOne({
+            email: email.toLowerCase(),
+            password: hashedPassword,
+            displayName: displayName,
+            provider: "mongodb",
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        });
+
+        const user = await client.db("anilog").collection("users").findOne({ email: email.toLowerCase() });
+
+        await client.db("anilog").collection("users").updateOne(
+            { _id: user._id },
+            { $set: { lastLoginAt: new Date() } }
+        );
+
+        const cookieStore = await cookies();
+        cookieStore.set({
+            name: 'userId',
+            value: user._id.toString(),
+            httpOnly: true, // Mais segurança
+            path: '/',
+            maxAge: 60 * 60 * 24 * 7 // 1 semana
+        });
+
+        return NextResponse.json({
+            success: true,
+            user: { id: result.insertedId, email }
+        }, { status: 201 });
+
+    } catch (error) {
+        return NextResponse.json({ error: "Erro interno" }, { status: 500 });
+    }
+}
