@@ -2,7 +2,8 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut} from "firebase/auth";
-import { auth } from "@/lib/firebase"; // Ajusta o caminho se necessário
+import { auth } from "@/lib/firebase";
+import {NextResponse as response} from "next/server"; // Ajusta o caminho se necessário
 
 const AuthContext = createContext({});
 
@@ -54,8 +55,8 @@ export const AuthProvider = ({ children }) => {
      */
     const syncUserWithMongo = async (firebaseUser) => {
         try {
-            // Faz POST para a API de sincronização
-            await fetch("/api/users/sync", {
+
+            const res = await fetch("/api/users/sync", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -66,8 +67,18 @@ export const AuthProvider = ({ children }) => {
                     provider: "google",
                 }),
             });
+
+            const data = await res.json();
+
+            // Se API devolver o utilizador, atualizar o estado com o isPublic do MongoDB
+            if(data.user) {
+                setUser((prev) => ({
+                    ...prev,
+                    displayName: data.user.displayName,
+                    isPublic: data.user.isPublic,
+                }));
+            }
         } catch (error) {
-            // Log do erro mas não bloqueia o login
             console.error("Erro ao sincronizar com MongoDB:", error);
         }
     };

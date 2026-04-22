@@ -21,7 +21,8 @@ import {MessageSquareText} from 'lucide-react';
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import {AddToWatchlistButton} from "@/components/AddToWatchlistButton";
+import { AddToWatchlistButton } from "@/components/AddToWatchlistButton";
+import {SuggestAI} from "@/components/SuggestAI";
 
 export default function Home() {
     // const [status, setStatus] = useState(false);
@@ -286,6 +287,7 @@ export default function Home() {
                   </TableBody>
               </Table>
           </div>
+          <SuggestAI />
       </div>
   );
 }

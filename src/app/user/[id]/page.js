@@ -16,21 +16,20 @@ import {
     HoverCardTrigger,
 } from "@/components/ui/hover-card"
 
-import {MessageSquareText} from 'lucide-react';
+import {MessageSquareText, Lock} from 'lucide-react';
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import {useRouter} from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { AddToWatchlistButton } from "@/components/AddToWatchlistButton";
 
 import {useParams} from "next/navigation";
 
 export default function UserProfilePage () {
-    // const [status, setStatus] = useState(false);
 
     // GET THE USERNAME USING THE HOOK
     const params = useParams();
-    const username = params.username;
+    const username = params.id;
 
 
     const [watchlist, setWatchlist] = useState([]);
@@ -39,6 +38,7 @@ export default function UserProfilePage () {
     const planToWatch = watchlist.filter((anime) => anime.status === "Plan to watch");
     const dropped = watchlist.filter((anime) => anime.status === "Dropped");
     const [isLoading, setIsLoading] = useState(true);
+    const [isPrivate, setIsPrivate] = useState(false);
 
     const { user, loading} = useAuth();
 
@@ -56,8 +56,17 @@ export default function UserProfilePage () {
 
             try{
                 const res = await fetch(`/api/watchlist?username=${username}`)
+
+                if (res.status === 403) {
+                    // The profile owner set their list to private
+                    setIsPrivate(true);
+                    setWatchlist([]);
+                    return;
+                }
+
                 const data = await res.json();
                 setWatchlist(data);
+                setIsPrivate(false);
             }
             catch (error) {console.error("Failed to fetch watchlist")}
             finally{
@@ -67,11 +76,16 @@ export default function UserProfilePage () {
         fetchWatchlist();
     }, [user, username]);
 
-    if(!user) return null;
-
-    if (isLoading) {
+    if (loading || !user) {
         return <div>Loading your anime list...</div>;
     }
+
+    if(isPrivate) return(
+      <div className="flex flex-col items-center justify-center gap-4 mt-20">
+          <Lock size={48} className="text-slate-400" />
+          <p className="text-lg"><span className="font-bold">{username}&apos;s</span> list is <span className="font-bold">private</span>. You don&apos;t have permission to see it.</p>
+      </div>
+    );
 
     return (
         <div className="userlist w-full">
@@ -159,13 +173,10 @@ export default function UserProfilePage () {
 
                                             className="rounded-xl aspect-square object-cover group-hover:brightness-50 transition-all duration-300"
                                         />
-                                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                            <AddToWatchlistButton anime={anime} userData={anime} />
-                                        </div>
                                     </div>
                                 </TableCell>
-                                <TableCell className="font-medium"><Link
-                                    className="cursor-pointer block hover:font-bold" href={`/anime/${anime.mal_id}`} >{anime.title}</Link></TableCell>
+                                <TableCell className="font-medium">
+                                    <Link className="cursor-pointer block hover:font-bold" href={`/anime/${anime.mal_id}`} >{anime.title}</Link></TableCell>
                                 <TableCell className="text-center">
                                     {anime.notes && (
                                         <HoverCard>

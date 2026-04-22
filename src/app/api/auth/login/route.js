@@ -35,6 +35,7 @@ export async function POST(request) {
                 id: user._id,
                 email: user.email,
                 displayName: user.displayName,
+                isPublic: user.isPublic ?? true,
                 provider: "mongodb"
             }
         });

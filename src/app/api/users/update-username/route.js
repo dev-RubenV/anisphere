@@ -9,7 +9,7 @@ export async function POST(request) {
     try {
         const { newUsername, password, email} = await request.json();
 
-        if (typeof email !== "string" || newUsername !== "string" || (password && typeof password !== "string")) {
+        if (typeof email !== "string" || typeof newUsername !== "string" || (password && typeof password !== "string")) {
             return NextResponse.json({ error: "Invalid data format" }, { status: 400 });
         }
 

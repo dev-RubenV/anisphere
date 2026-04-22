@@ -14,18 +14,28 @@ export async function POST(request) {
         const client = await clientPromise;
         const db = client.db("anilog");
 
-        // Verifica duplicados
-        const existingUser = await db.collection("users").findOne({ email: email.toLowerCase() });
-        if (existingUser) {
+        // Verifica emails duplicados
+        const existingEmail = await db.collection("users").findOne({ email: email.toLowerCase() });
+        if (existingEmail) {
             return NextResponse.json({ error: "Email já registado" }, { status: 400 });
         }
 
+        // Verifica username duplicado
+        const cleanUsername = displayName.trim();
+        const usernameRegex = { $regex: new RegExp(`^${cleanUsername}$`, 'i') };
+
+        const checkUsernameAvailability = await db.collection("users").findOne({ displayName: usernameRegex});
+
+        if (checkUsernameAvailability && checkUsernameAvailability._id.toString() !== currentUser._id.toString()) {
+            return NextResponse.json({ error: "Username already exists" }, { status: 400 });
+        }
         const hashedPassword = await bcrypt.hash(password, 12);
 
         const result = await db.collection("users").insertOne({
             email: email.toLowerCase(),
             password: hashedPassword,
             displayName: displayName,
+            isPublic: true,
             provider: "mongodb",
             createdAt: new Date(),
             updatedAt: new Date(),

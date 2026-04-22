@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb";
 import { cookies } from "next/headers";
+import { generateFromEmail, generateUsername, uniqueUsernameGenerator, adjectives, nouns } from "unique-username-generator";
 
 export async function POST(request) {
     try {
@@ -16,6 +17,25 @@ export async function POST(request) {
         const db = client.db("anilog");
         const usersCollection = db.collection("users");
 
+        const existingUser = await usersCollection.findOne({ firebaseUid: uid });
+        let generatedUsername;
+        let isUnique = false;
+
+        // se utilizador não existir, atribuir username aleatório
+        if(!existingUser) {
+            do{
+                generatedUsername = uniqueUsernameGenerator({
+                    dictionaries: [adjectives, nouns],
+                    separator: "",
+                    style: "titleCase", // <--- Força as letras maiúsculas!
+                    randomDigits: 4,
+                    length: 30
+                });
+                const existingUsername = await usersCollection.findOne({ displayName: generatedUsername });
+                if(!existingUsername) isUnique = true;
+            } while(!isUnique);
+        }
+
         // 2. UPSERT (Update + Insert)
         // Se o utilizador já existe (pelo ID do Firebase), atualizamos os dados.
         // Se não existe, criamos um novo.
@@ -23,16 +43,17 @@ export async function POST(request) {
             { firebaseUid: uid }, // Filtro: procura por este ID
             {
                 $set: {
-                    firebaseUid: uid,
-                    email: email,
-                    displayName: displayName || null,
                     photoURL: photoURL || null,
-                    provider: provider || "google",
                     updatedAt: new Date(),
                     lastLoginAt: new Date(),
                 },
                 $setOnInsert: {
-                    createdAt: new Date(), // Só define isto se for criar um novo
+                    isPublic: true,
+                    email: email, // Só define isto se for criar um novo
+                    displayName: generatedUsername || null,
+                    firebaseUid: uid,
+                    createdAt: new Date(),
+                    provider: provider || "google",
                 },
             },
             { upsert: true } // A opção que cria se não existir
@@ -48,10 +69,17 @@ export async function POST(request) {
             maxAge: 60 * 60 * 24 * 7 // 1 semana
         });
 
-        // 3. Responder ao cliente
+        // 3. Fetch the updated user to return isPublic
+        const updatedUser = await usersCollection.findOne(
+            { firebaseUid: uid },
+            { projection: { displayName: 1, email: 1, isPublic: 1, photoURL: 1, _id: 0 } }
+        );
+
+        // 4. Responder ao cliente
         return NextResponse.json({
             success: true,
             message: result.upsertedCount > 0 ? "User Created" : "User Updated",
+            user: updatedUser,
         });
 
     } catch (error) {

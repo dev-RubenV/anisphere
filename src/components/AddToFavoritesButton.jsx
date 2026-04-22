@@ -44,6 +44,7 @@ export function AddToFavoritesButton({ anime, userData}) {
                 body: JSON.stringify({
                     anime: anime,
                     userId: user.id || user._id,
+                    username: user.displayName,
                     user_score: score,
                     status: status,
                     image_url: image_url,
