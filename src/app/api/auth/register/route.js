@@ -12,7 +12,7 @@ export async function POST(request) {
         }
 
         const client = await clientPromise;
-        const db = client.db("anilog");
+        const db = client.db("anisphere");
 
         // Verifica emails duplicados
         const existingEmail = await db.collection("users").findOne({ email: email.toLowerCase() });
@@ -41,9 +41,9 @@ export async function POST(request) {
             updatedAt: new Date(),
         });
 
-        const user = await client.db("anilog").collection("users").findOne({ email: email.toLowerCase() });
+        const user = await client.db("anisphere").collection("users").findOne({ email: email.toLowerCase() });
 
-        await client.db("anilog").collection("users").updateOne(
+        await client.db("anisphere").collection("users").updateOne(
             { _id: user._id },
             { $set: { lastLoginAt: new Date() } }
         );

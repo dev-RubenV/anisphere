@@ -24,7 +24,7 @@ export async function POST(request) {
         }
 
         const client = await clientPromise;
-        const usersCollection = await client.db("anilog").collection("users");
+        const usersCollection = await client.db("anisphere").collection("users");
         const currentUser = await usersCollection.findOne({ email: email });
 
         if (!currentUser) {

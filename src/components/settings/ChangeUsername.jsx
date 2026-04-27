@@ -112,45 +112,60 @@ export default function ChangeUsername() {
     }
 
     return (
-        <FieldGroup className="max-w-sm w-full">
-            <form onSubmit={handleUsernameSubmit}>
-                <Field className={"max-w-sm mb-4"}>
-                    <FieldLabel htmlFor="username">
-                        <h1 className="scroll-m-20 text-center text-xl font-extrabold">
-                            Change your Username:
-                        </h1>
+        <FieldGroup className="w-full">
+            <form onSubmit={handleUsernameSubmit} className="space-y-5">
+                <div className="mb-4">
+                    <h2 className="headline-md text-[#1A202E] mb-1">Change Username</h2>
+                    <p className="text-[#4A5568] text-sm">Choose a unique name to represent you.</p>
+                </div>
+                
+                <Field className="w-full">
+                    <FieldLabel htmlFor="username" className="text-[#1A202E] font-semibold text-sm mb-1.5 block">
+                        New Username
                     </FieldLabel>
-                    <InputGroup className="h-auto">
+                    <InputGroup className="bg-white border-[#D8DADC] rounded-lg focus-within:border-[#FD8D32] focus-within:ring-2 focus-within:ring-[#FD8D32]/15 transition-all w-full">
                         <InputGroupInput
                             id="username"
                             value={username}
                             onChange={e => setUsername(e.target.value)}
+                            className="border-none focus:ring-0 text-[#1A202E] py-2.5 px-3 w-full"
                         />
                     </InputGroup>
-                    <FieldDescription htmlFor="username">{usernameError}</FieldDescription>
-                </Field>
-                <Field className="max-w-sm my-4">
-                    <FieldLabel htmlFor="username">
-                        <p className="text-center text-xl font-extrabold">
-                            Password:
+                    {usernameError && (
+                        <p className={`text-sm mt-1.5 font-medium ${usernameError.includes('successfully') ? 'text-[#954A00]' : 'text-[#BA1A1A]'}`}>
+                            {usernameError}
                         </p>
+                    )}
+                </Field>
+
+                <Field className="w-full">
+                    <FieldLabel htmlFor="current-password" className="text-[#1A202E] font-semibold text-sm mb-1.5 block">
+                        Password confirmation
                     </FieldLabel>
-                    <InputGroup>
+                    <InputGroup className="bg-white border-[#D8DADC] rounded-lg focus-within:border-[#FD8D32] focus-within:ring-2 focus-within:ring-[#FD8D32]/15 transition-all w-full">
                         <InputGroupInput
-                            id="block-start-input"
+                            id="current-password"
                             type={passwordVisibility ? "text" : "password"}
                             placeholder={user?.provider === "google" ? "Not required for Google accounts" : "Enter your current password"}
                             disabled={user?.provider === "google"}
                             value={password}
-                            onChange={e => setPassword(e.target.value)}/>
-                        <InputGroupAddon className="cursor-pointer"
+                            onChange={e => setPassword(e.target.value)}
+                            className="border-none focus:ring-0 text-[#1A202E] py-2.5 px-3 placeholder:text-[#A0ABC1] w-full"
+                        />
+                        <InputGroupAddon className="cursor-pointer text-[#4A5568] hover:text-[#FD8D32] transition-colors pr-3"
                                          onClick={() => setPasswordVisibility(!passwordVisibility)} align="inline-end">
-                            {passwordVisibility ? <EyeOffIcon/> : <EyeIcon/>}
+                            {passwordVisibility ? <EyeOffIcon className="w-4 h-4"/> : <EyeIcon className="w-4 h-4"/>}
                         </InputGroupAddon>
                     </InputGroup>
                 </Field>
 
-                    <Button className="cursor-pointer" type="submit" variant="outline">Change username</Button>
+                <Button 
+                    className="cursor-pointer bg-[#FD8D32] hover:bg-[#e07a28] text-white font-medium rounded-lg px-6 py-2.5 w-full sm:w-auto mt-2 transition-all hover:-translate-y-0.5" 
+                    type="submit" 
+                    disabled={isSubmitting}
+                >
+                    {isSubmitting ? "Saving..." : "Change Username"}
+                </Button>
             </form>
         </FieldGroup>)
 }

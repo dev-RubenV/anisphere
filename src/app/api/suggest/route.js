@@ -4,7 +4,7 @@ import { GoogleGenAI } from "@google/genai";
 export async function POST(request) {
     try {
 
-        const { currentUserAnimeData, animeData, displayName } = await request.json();
+        const { currentUserAnimeData, animeData, displayName, previousSuggestions } = await request.json();
 
         const ai = new GoogleGenAI({});
 
@@ -28,25 +28,44 @@ export async function POST(request) {
             required: ["message", "suggestions"]
         };
 
-        let response;
+        // Build a plain list of previously suggested titles so Gemini avoids repeating them
+        const alreadySuggested = Array.isArray(previousSuggestions) && previousSuggestions.length > 0
+            ? `You have already suggested these anime to ${displayName} in previous sessions, DO NOT suggest them again: ${previousSuggestions.join(", ")}. `
+            : "";
+
+        let prompt;
         if (!animeData) {
-            response = await ai.models.generateContent({
-                model: "gemini-3-flash-preview",
-                contents: `You are an expert anime recommender. Here is ${displayName}'s anime list: ${JSON.stringify(currentUserAnimeData)}. Recommend exactly 3 high-quality anime they HAVE NOT watched yet.`,
-                config: {
-                    responseMimeType: "application/json",
-                    responseSchema: recommendationSchema,
-                }
-            });
+            prompt = `You are an expert anime recommender. Here is ${displayName}'s anime list: ${JSON.stringify(currentUserAnimeData)}. ${alreadySuggested}Recommend exactly 3 high-quality anime they HAVE NOT watched yet and that you have NOT previously recommended.`;
         } else {
-            response = await ai.models.generateContent({
-                model: "gemini-3-flash-preview",
-                contents: `You are an expert anime recommender. Compare ${displayName}'s anime list: ${JSON.stringify(currentUserAnimeData)} with this other user's list: ${JSON.stringify(animeData)}. Recommend exactly 3 anime that ${displayName} HAS NOT watched yet.`,
-                config: {
-                    responseMimeType: "application/json",
-                    responseSchema: recommendationSchema,
-                }
-            });
+             prompt = `You are an expert anime recommender. Compare ${displayName}'s anime list: ${JSON.stringify(currentUserAnimeData)} with this other user's list: ${JSON.stringify(animeData)}. ${alreadySuggested}Recommend exactly 3 anime that ${displayName} HAS NOT watched yet and that you have NOT previously recommended.`;
+        }
+
+        const config = {
+             responseMimeType: "application/json",
+             responseSchema: recommendationSchema,
+        };
+
+        let response;
+        try {
+             // Primary Model
+             response = await ai.models.generateContent({
+                  model: "gemini-3-flash-preview",
+                  contents: prompt,
+                  config: config
+             });
+        } catch (error) {
+             console.warn("Primary model (gemini-3-flash-preview) failed, falling back to gemini-2.5-flash:", error);
+             // Fallback Model
+             try {
+                 response = await ai.models.generateContent({
+                      model: "gemini-2.5-flash",
+                      contents: prompt,
+                      config: config
+                 });
+             } catch (fallbackError) {
+                  console.error("Fallback model (gemini-2.5-flash) also failed:", fallbackError);
+                  throw fallbackError; // Re-throw to be caught by the outer catch block
+             }
         }
 
         const recommendationData = JSON.parse(response.text);

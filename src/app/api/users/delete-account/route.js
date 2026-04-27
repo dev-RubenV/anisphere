@@ -22,7 +22,7 @@ export async function DELETE(request){
         }
 
         const client = await clientPromise;
-        const usersCollection = await client.db("anilog").collection("users");
+        const usersCollection = await client.db("anisphere").collection("users");
         const currentUser = await usersCollection.findOne(userQuery);
 
         if (!currentUser){
@@ -35,7 +35,7 @@ export async function DELETE(request){
             }
         }
 
-        await client.db("anilog").collection("watchlist").deleteMany({ userId: userId });
+        await client.db("anisphere").collection("watchlist").deleteMany({ userId: userId });
 
         await usersCollection.deleteOne(userQuery);
 

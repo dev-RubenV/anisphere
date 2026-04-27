@@ -1,43 +1,33 @@
 'use client'
-import {useEffect, useState} from "react";
+import { HeartIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { PlusIcon, PencilIcon, HeartIcon, Trash } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { Toggle } from "@/components/ui/toggle"
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipTrigger,
-} from "@/components/ui/tooltip"
-import {toast} from "sonner";
+import { toast } from "sonner";
+import { useState, useEffect } from "react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
-
-export function AddToFavoritesButton({ anime, userData}) {
+export function AddToFavoritesButton({ anime, userData }) {
     const { user } = useAuth();
     const router = useRouter();
-    const [isAdded, setIsAdded] = useState(!!userData);
+    const [isFavorite, setIsFavorite] = useState(false);
 
-    const [status, setStatus] = useState(userData?.status || 'Watching');
-    const [score, setScore] = useState(userData?.user_score || 0.0);
-    const [progress, setProgress] = useState(userData?.progress ||0);
-    const [image_url, setImageURL] = useState(userData?.image_url || "");
-    const [isFavorite, setIsFavorite] = useState(userData?.isFavorite || false);
-    const [notes, setNotes] = useState(userData?.notes || '');
+    useEffect(() => {
+        setIsFavorite(userData?.isFavorite || false);
+    }, [userData]);
 
-    const handleIsFavorite = async (pressed) => {
-
-        const newIsFavorite = !isFavorite;
-        setIsFavorite(newIsFavorite);
-
+    const handleToggleFavorite = async () => {
         if (!user) {
             router.push("/login");
             return;
         }
 
-        try {
+        const newFavoriteState = !isFavorite;
+        
+        // Optimistic UI update
+        setIsFavorite(newFavoriteState);
 
+        try {
             const res = await fetch("/api/watchlist", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -45,69 +35,50 @@ export function AddToFavoritesButton({ anime, userData}) {
                     anime: anime,
                     userId: user.id || user._id,
                     username: user.displayName,
-                    user_score: score,
-                    status: status,
-                    image_url: image_url,
-                    progress: progress,
-                    isFavorite: newIsFavorite,
-                    notes: notes
+                    user_score: userData?.user_score || 0.0,
+                    status: userData?.status || "Watching",
+                    image_url: userData?.image_url || anime.images?.jpg?.image_url || "",
+                    progress: userData?.progress || 0,
+                    isFavorite: newFavoriteState,
+                    notes: userData?.notes || ""
                 })
             });
 
             if (res.ok) {
-                setIsAdded(true);
+                toast(newFavoriteState ? "Added to favorites!" : "Removed from favorites!");
                 router.refresh();
-
-                toast(isFavorite ? `${anime.title_english} has been removed from your favorites` : `${anime.title_english} has been added to your favorites`);
-            }
-            else{
-                setIsFavorite(!newIsFavorite);
-                console.error("Failed to update favorite");
+            } else {
+                // Revert optimistic update
+                setIsFavorite(!newFavoriteState);
+                toast.error("Failed to update favorites");
             }
         } catch (error) {
-            console.error("Failed to add", error);
+            console.error("Failed to toggle favorite", error);
+            // Revert optimistic update
+            setIsFavorite(!newFavoriteState);
+            toast.error("An error occurred");
         }
     };
 
-    if(user) {
-        return (
-            <Tooltip>
-                <TooltipTrigger asChild>
-                    <Toggle
-                        onPressedChange={handleIsFavorite}
-                        pressed={isFavorite}
-                        aria-label="Toggle favorite"
-                        size="sm"
-                        variant="outline"
-                        className="cursor-pointer py-4.25 w-full bg-red-400 text-white hover:bg-red-500 data-[state=on]:*:[svg]:fill-neutral-0 data-[state=on]:*:[svg]:fill-neutral-0"
-                    >
-                        <HeartIcon className={`transition-all ${isFavorite ? "fill-current" : ""}`} />                    </Toggle>
-                </TooltipTrigger>
-                <TooltipContent side="bottom">
-                    <p>{!isFavorite ? "Add to":"Remove from"} favorites</p>
-                </TooltipContent>
-            </Tooltip>
-        );
-    } return (
-        <Link href="/login">
-            <Tooltip>
-                <TooltipTrigger asChild>
-                    <Toggle
-                        onPressedChange={handleIsFavorite}
-                        pressed={isFavorite}
-                        aria-label="Toggle favorite"
-                        size="sm"
-                        className="cursor-pointer py-4.25 w-full data-[state=on]:*:[svg]:fill-blue-400 data-[state=on]:*:[svg]:stroke-blue-400"
-                    >
-                        <HeartIcon className={`transition-all ${isFavorite ? "fill-current" : ""}`} />
-                    </Toggle>
-                </TooltipTrigger>
-                 <TooltipContent side="bottom">
-                    <p>{isAdded ? "Add to":"Remove from"} favorites</p>
-                </TooltipContent>
-            </Tooltip>
-        </Link>
+    return (
+        <Tooltip>
+            <TooltipTrigger asChild>
+                <Button
+                    onClick={handleToggleFavorite}
+                    variant="outline"
+                    className={`cursor-pointer w-full transition-all border-[#DCC1B1] shadow-sm
+                        ${isFavorite 
+                            ? "bg-[#FD8D32]/10 hover:bg-[#FD8D32]/20 border-[#FD8D32]/30 text-[#954A00]" 
+                            : "bg-white hover:bg-[#F8FAFC] text-[#4A5568] hover:text-[#1A202E]"
+                        }`}
+                >
+                    <HeartIcon className={`w-4 h-4 mr-2 ${isFavorite ? "fill-[#FD8D32] text-[#FD8D32]" : ""}`} />
+                    {isFavorite ? "Favorited" : "Favorite"}
+                </Button>
+            </TooltipTrigger>
+            <TooltipContent className="bg-white border-[#DCC1B1] text-[#1A202E]">
+                <p>{isFavorite ? "Remove from favorites" : "Add to favorites"}</p>
+            </TooltipContent>
+        </Tooltip>
     );
-
-
 }

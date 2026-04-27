@@ -11,7 +11,7 @@ export async function DELETE(request){
      }
 
      const client = await clientPromise;
-     const db = client.db("anilog");
+     const db = client.db("anisphere");
      const result = await db.collection("watchlist").deleteOne(
          {
          userId: userId,
@@ -39,7 +39,7 @@ export async function POST(request){
         }
 
         const client = await clientPromise;
-        const db = client.db("anilog");
+        const db = client.db("anisphere");
         const result = await db.collection("watchlist").updateOne(
             {
                 userId: userId,
@@ -91,7 +91,7 @@ export async function GET(request){
         if(!userId && !username) return NextResponse.json({ error: "No user found." }, {status: 400});
 
         const client = await clientPromise;
-        const db = client.db("anilog");
+        const db = client.db("anisphere");
 
         // Privacy enforcement: when fetching by username, check if the profile is public
         if (username) {

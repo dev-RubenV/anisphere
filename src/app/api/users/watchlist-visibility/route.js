@@ -21,7 +21,7 @@ export async function POST(request){
         }
 
         const client = await clientPromise;
-        const usersCollection = client.db("anilog").collection("users");
+        const usersCollection = client.db("anisphere").collection("users");
 
         // Find user by cookie userId — try both ObjectId and firebaseUid
         let user;

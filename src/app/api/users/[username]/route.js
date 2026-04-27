@@ -11,7 +11,7 @@ export async function GET(request, { params }) {
 
     try {
         const client = await clientPromise;
-        const db = client.db("anilog");
+        const db = client.db("anisphere");
 
         // Define your two collections
         const usersCollection = db.collection("users");

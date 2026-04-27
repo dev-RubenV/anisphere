@@ -59,52 +59,58 @@ export default function DeleteAccount() {
     if (!user) return null;
 
     return(
-        <FieldGroup className="max-w-sm w-full">
-            <form onSubmit={handleSubmit}>
+        <FieldGroup className="w-full">
+            <form onSubmit={handleSubmit} className="space-y-5">
+                <div className="mb-4">
+                    <h2 className="headline-md text-[#BA1A1A] mb-1">Danger Zone</h2>
+                    <p className="text-[#4A5568] text-sm">Once you delete your account, there is no going back. Please be certain.</p>
+                </div>
 
             {user.provider !== "google" && (
-                <Field className="max-w-sm mb-4">
-                    <FieldLabel htmlFor="currentPassword">
-                        <p className="text-center text-xl font-extrabold">
-                            Insert your current password:
-                        </p>
+                <Field className="w-full">
+                    <FieldLabel htmlFor="currentPasswordDelete" className="text-[#1A202E] font-semibold text-sm mb-1.5 block">
+                        Confirm your password to delete
                     </FieldLabel>
-                    <InputGroup>
+                    <InputGroup className="bg-white border-[#D8DADC] rounded-lg focus-within:border-[#BA1A1A] focus-within:ring-2 focus-within:ring-[#BA1A1A]/15 transition-all w-full">
                         <InputGroupInput
-                            id="currentPassword"
+                            id="currentPasswordDelete"
                             type={passwordVisibility ? "text" : "password"}
                             placeholder="Enter your current password"
                             value={password}
-                            onChange={e => setPassword(e.target.value)}/>
-                        <InputGroupAddon className="cursor-pointer"
+                            onChange={e => setPassword(e.target.value)}
+                            className="border-none focus:ring-0 text-[#1A202E] py-2.5 px-3 placeholder:text-[#A0ABC1] w-full"
+                        />
+                        <InputGroupAddon className="cursor-pointer text-[#4A5568] hover:text-[#BA1A1A] transition-colors pr-3"
                                          onClick={() => setPasswordVisibility(!passwordVisibility)} align="inline-end">
-                            {passwordVisibility ? <EyeOffIcon/> : <EyeIcon/>}
+                            {passwordVisibility ? <EyeOffIcon className="w-4 h-4"/> : <EyeIcon className="w-4 h-4"/>}
                         </InputGroupAddon>
                     </InputGroup>
-                    <div className="text-sm text-red-500 mt-2">
-                        {passwordError}
-                    </div>
+                    {passwordError && (
+                        <div className="text-sm font-medium text-[#BA1A1A] mt-1.5">
+                            {passwordError}
+                        </div>
+                    )}
                 </Field>
             )}
                 <Dialog>
                     <DialogTrigger asChild>
-                        <Button className="cursor-pointer bg-red-700 hover:bg-red-800 text-white" type="button" variant="default">
-                            Delete account
+                        <Button className="cursor-pointer bg-[#BA1A1A] hover:bg-[#93000A] text-white font-medium rounded-lg px-6 py-2.5 w-full sm:w-auto mt-2 transition-all hover:-translate-y-0.5" type="button" variant="default">
+                            Delete Account
                         </Button>
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-sm">
+                    <DialogContent className="sm:max-w-sm bg-white border-[#DCC1B1]/30 shadow-xl rounded-xl">
                         <DialogHeader>
-                            <DialogTitle>Are you sure?</DialogTitle>
-                            <DialogDescription>
-                                These changes are permanent. Are you sure you want to proceed?
+                            <DialogTitle className="text-[#1A202E] font-bold">Are you absolutely sure?</DialogTitle>
+                            <DialogDescription className="text-[#4A5568]">
+                                This action cannot be undone. This will permanently delete your account and remove your data from our servers.
                             </DialogDescription>
                         </DialogHeader>
-                        <DialogFooter>
+                        <DialogFooter className="mt-4 gap-2 sm:gap-0">
                             <DialogClose asChild>
-                                <Button className="cursor-pointer" variant="outline" type="button">Cancel</Button>
+                                <Button className="cursor-pointer border-[#DCC1B1] text-[#4A5568] hover:bg-[#F2F4F6]" variant="outline" type="button">Cancel</Button>
                             </DialogClose>
-                            <Button className="cursor-pointer bg-red-700 hover:bg-red-800 text-white" onClick={handleSubmit} type="button" variant="default">
-                                Proceed
+                            <Button className="cursor-pointer bg-[#BA1A1A] hover:bg-[#93000A] text-white" onClick={handleSubmit} type="button" variant="default">
+                                Proceed with Deletion
                             </Button>
                         </DialogFooter>
                     </DialogContent>

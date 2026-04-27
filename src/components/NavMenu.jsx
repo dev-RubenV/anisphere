@@ -1,18 +1,10 @@
 "use client"
 
 import * as React from "react"
+import { useState } from "react"
 import Link from "next/link"
-import { House, BookOpen, NotebookPen} from "lucide-react"
+import { Menu, X } from "lucide-react"
 import { AnimeSearch } from "@/components/AnimeSearch";
-import {
-    NavigationMenu,
-    NavigationMenuContent,
-    NavigationMenuItem,
-    NavigationMenuLink,
-    NavigationMenuList,
-    NavigationMenuTrigger,
-    navigationMenuTriggerStyle,
-} from "@/components/ui/navigation-menu"
 import { Button } from "@/components/ui/button"
 import {
     DropdownMenu,
@@ -20,12 +12,7 @@ import {
     DropdownMenuGroup,
     DropdownMenuItem,
     DropdownMenuLabel,
-    DropdownMenuPortal,
     DropdownMenuSeparator,
-    DropdownMenuShortcut,
-    DropdownMenuSub,
-    DropdownMenuSubContent,
-    DropdownMenuSubTrigger,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import {
@@ -35,72 +22,147 @@ import {
 } from "@/components/ui/avatar"
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
-import styles from "@/app/login/Login.module.css";
 import Image from "next/image";
+
 export function NavMenu() {
 
-    // Auth do user
     const { user, loading, logout } = useAuth();
-
-    // Navegação next.js
     const router = useRouter();
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-    const handleLogout = async ()=> {
+    const handleLogout = async () => {
         await logout();
         await router.push("/login");
     }
 
     return (
-        <header className="container w-full py-4 px-6 flex items-center justify-between gap-4">
-            <div className="flex items-center">
-                <Link href="/">
-                    <Button variant="ghost" className="cursor-pointer gap-2 font-semibold">
-                        <NotebookPen className="w-4 h-4" />
-                        Anime list
-                    </Button>
-                </Link>
+        <header className="glass sticky top-4 z-50 mx-auto w-[95%] max-w-6xl rounded-3xl border border-[#DCC1B1]/30 shadow-sm">
+            <div className="container flex items-center justify-between gap-4 py-3 px-4 md:px-8 max-w-7xl mx-auto">
+                {/* Logo / Brand */}
+                <div className="flex items-center shrink-0">
+                    <Link href="/">
+                        <Button
+                            variant="ghost"
+                            className="cursor-pointer gap-2 font-semibold text-[#1A202E] hover:text-[#FD8D32] hover:bg-[#FD8D32]/5 transition-colors"
+                        >
+                            <Image className="w-5 h-5 text-[#FD8D32]"
+                            src="/anisphere-logo.png"
+                            alt="anisphere-logo"
+                            width="56"
+                            height="56"/>
+                            <span className="text-lg font-bold">anisphere</span>
+                        </Button>
+                    </Link>
+                </div>
+
+                {/* Search bar — hidden on mobile, shown on desktop */}
+                <div className="hidden md:flex flex-1 max-w-md mx-auto">
+                    <AnimeSearch />
+                </div>
+
+                {/* Desktop user area */}
+                <div className="hidden md:flex items-center justify-end gap-3">
+                    {!user ? (
+                        <Button
+                            asChild
+                            className="bg-[#FD8D32] hover:bg-[#e07a28] text-white rounded-lg px-5 cursor-pointer transition-all hover:-translate-y-0.5"
+                        >
+                            <Link href="/login">Login</Link>
+                        </Button>
+                    ) : (
+                        <div className="flex items-center gap-3">
+                            <p className="text-sm text-[#4A5568]">
+                                Hello, <span className="font-semibold text-[#1A202E]">{user?.displayName ? `${user.displayName}` : "User"}</span>
+                            </p>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Avatar className="cursor-pointer hover:ring-2 hover:ring-[#FD8D32]/40 transition-all w-9 h-9">
+                                        <AvatarImage
+                                            src={user?.photoURL}
+                                            alt="user"
+                                            referrerPolicy="no-referrer"
+                                        />
+                                        <AvatarFallback className="bg-[#FD8D32]/10 text-[#954A00] font-semibold text-sm">
+                                            {user?.displayName ? user.displayName[0].toUpperCase() : "U"}
+                                        </AvatarFallback>
+                                    </Avatar>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent className="w-52 bg-white border-[#DCC1B1]/30 shadow-lg rounded-xl" align="end">
+                                    <DropdownMenuLabel className="text-[#1A202E] font-semibold">My Account</DropdownMenuLabel>
+                                    <DropdownMenuGroup>
+                                        <Link href={"/profile"}><DropdownMenuItem className="cursor-pointer text-[#4A5568] hover:text-[#FD8D32] hover:bg-[#FD8D32]/5">Profile</DropdownMenuItem></Link>
+                                        <Link href={"/settings"}><DropdownMenuItem className="cursor-pointer text-[#4A5568] hover:text-[#FD8D32] hover:bg-[#FD8D32]/5">Settings</DropdownMenuItem></Link>
+                                    </DropdownMenuGroup>
+                                    <DropdownMenuSeparator className="bg-[#E6E8EA]" />
+                                    <DropdownMenuItem className="cursor-pointer text-[#BA1A1A] hover:bg-red-50" onClick={handleLogout}>
+                                        Logout
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
+                    )}
+                </div>
+
+                {/* Mobile menu button */}
+                <button
+                    className="md:hidden p-2 rounded-lg hover:bg-[#EDF2F7] transition-colors text-[#1A202E]"
+                    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                    aria-label="Toggle menu"
+                >
+                    {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                </button>
             </div>
 
-            <div className="flex-1 max-w-md mx-auto">
-                <AnimeSearch />
-            </div>
+            {/* Mobile menu dropdown */}
+            {mobileMenuOpen && (
+                <div className="md:hidden border-t border-[#E6E8EA] bg-white/95 backdrop-blur-md px-4 pb-4 pt-3 space-y-3 animate-in slide-in-from-top-2 duration-200 rounded-xl">
+                    {/* Mobile search */}
+                    <div className="w-full">
+                        <AnimeSearch />
+                    </div>
 
-            <div className="flex items-center justify-end">
-                {!user ? (
-                    <Button variant="secondary" asChild>
-                        <Link href="/login">Login</Link>
-                    </Button>
-                ) : (
-                    <div className="flex items-center">
-                        <p className="px-6">Hello, <span className="font-bold">{user?.displayName ? `${user.displayName}` : "User"}</span>!</p>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Avatar className="cursor-pointer hover:opacity-80 transition-opacity">
-                                    <AvatarImage
-                                        src={user?.photoURL}
-                                        alt="user"
-                                        referrerPolicy="no-referrer"
-                                    />
-                                    <AvatarFallback>
+                    {!user ? (
+                        <Button
+                            asChild
+                            className="w-full bg-[#FD8D32] hover:bg-[#e07a28] text-white rounded-lg cursor-pointer"
+                        >
+                            <Link href="/login" onClick={() => setMobileMenuOpen(false)}>Login</Link>
+                        </Button>
+                    ) : (
+                        <div className="space-y-2">
+                            <div className="flex items-center gap-3 px-2 py-2">
+                                <Avatar className="w-8 h-8">
+                                    <AvatarImage src={user?.photoURL} alt="user" referrerPolicy="no-referrer" />
+                                    <AvatarFallback className="bg-[#FD8D32]/10 text-[#954A00] font-semibold text-xs">
                                         {user?.displayName ? user.displayName[0].toUpperCase() : "U"}
                                     </AvatarFallback>
                                 </Avatar>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent className="w-56" align="end">
-                                <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                                <DropdownMenuGroup>
-                                    <Link href={"/profile"}><DropdownMenuItem className="cursor-pointer">Profile</DropdownMenuItem></Link>
-                                    <Link href={"/settings"}><DropdownMenuItem className="cursor-pointer">Settings</DropdownMenuItem></Link>
-                                </DropdownMenuGroup>
-                                <DropdownMenuSeparator/>
-                                <DropdownMenuItem className="cursor-pointer" onClick={handleLogout}>
-                                    Logout
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    </div>
-                )}
-            </div>
+                                <span className="font-semibold text-[#1A202E] text-sm">{user?.displayName || "User"}</span>
+                            </div>
+                            <Link
+                                href="/profile"
+                                onClick={() => setMobileMenuOpen(false)}
+                                className="block px-3 py-2 rounded-lg text-sm text-[#4A5568] hover:bg-[#EDF2F7] transition-colors"
+                            >
+                                Profile
+                            </Link>
+                            <Link
+                                href="/settings"
+                                onClick={() => setMobileMenuOpen(false)}
+                                className="block px-3 py-2 rounded-lg text-sm text-[#4A5568] hover:bg-[#EDF2F7] transition-colors"
+                            >
+                                Settings
+                            </Link>
+                            <button
+                                onClick={() => { handleLogout(); setMobileMenuOpen(false); }}
+                                className="cursor-pointer w-full text-left px-3 py-2 rounded-lg text-sm text-[#BA1A1A] hover:bg-red-50 transition-colors"
+                            >
+                                Logout
+                            </button>
+                        </div>
+                    )}
+                </div>
+            )}
         </header>
     )
 }

@@ -166,7 +166,7 @@ export default function Login() {
         <>
             {/* Configuração do <head> - título dinâmico baseado no modo */}
             <Head>
-                <title>{isRegister ? "Register" : "Login"} - MongoDB Monitor</title>
+                <title>{isRegister ? "Register" : "Login"} - AniSphere</title>
             </Head>
 
                 {/* Card principal do formulário */}
@@ -179,17 +179,17 @@ export default function Login() {
                     <div className={`w-full ${styles.header}`}>
                         {/* Logo do MongoDB */}
                         <div className={styles.logo}>
-                            <Image src="/AL-logo.png"
-                            alt="AL-logo"
-                            width={50}
-                            height={50}/>
+                            <Image src="/anisphere-logo.png"
+                            alt="anisphere-logo"
+                            width={350}
+                            height={350}/>
                         </div>
 
                         {/* Título dinâmico baseado no modo */}
                         <h1 className={styles.title}>
                             {isRegister ? "Create a new account" : "Welcome back!"}
                         </h1>
-                        <p className={styles.subtitle}>AniLog the app that track your anime series!</p>
+                        <p className={styles.subtitle}>Your personal anime tracking universe</p>
                     </div>
 
                     {/* ================================
@@ -246,7 +246,7 @@ export default function Login() {
               Separa os métodos de login
               ================================ */}
                     <div className={styles.divider}>
-                        <span>ou</span>
+                        <span>or</span>
                     </div>
 
                     {/* ================================

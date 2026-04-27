@@ -14,7 +14,7 @@ export async function POST(request) {
         }
 
         const client = await clientPromise;
-        const db = client.db("anilog");
+        const db = client.db("anisphere");
         const usersCollection = db.collection("users");
 
         const existingUser = await usersCollection.findOne({ firebaseUid: uid });

@@ -18,7 +18,7 @@ export default function ChangePassword() {
     const [newPassword, setNewPassword] = useState("");
     const [newPasswordVisibility, setNewPasswordVisibility] = useState(false);
     const [newPasswordError, setNewPasswordError] = useState("");
-    const PASSWORD_ERROR_MESSAGE = <ul className="list-disc pl-5 text-sm text-red-500">
+    const PASSWORD_ERROR_MESSAGE = <ul className="list-disc pl-5 text-sm text-[#BA1A1A]">
         <li>At least 8 characters</li>
         <li>Must contain at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character</li>
     </ul>;
@@ -102,76 +102,90 @@ export default function ChangePassword() {
     }
 
     return (
-            <FieldGroup className="max-w-sm w-full">
-                <form onSubmit={handleSubmit}>
-                    <Field className="max-w-sm mb-4">
-                        <FieldLabel htmlFor="currentPassword">
-                            <p className="text-center text-xl font-extrabold">
-                                Insert your current password:
-                            </p>
+            <FieldGroup className="w-full">
+                <form onSubmit={handleSubmit} className="space-y-5">
+                    <div className="mb-4">
+                        <h2 className="headline-md text-[#1A202E] mb-1">Change Password</h2>
+                        <p className="text-[#4A5568] text-sm">Update your password to keep your account secure.</p>
+                    </div>
+
+                    <Field className="w-full">
+                        <FieldLabel htmlFor="currentPassword" className="text-[#1A202E] font-semibold text-sm mb-1.5 block">
+                            Current Password
                         </FieldLabel>
-                        <InputGroup>
+                        <InputGroup className="bg-white border-[#D8DADC] rounded-lg focus-within:border-[#FD8D32] focus-within:ring-2 focus-within:ring-[#FD8D32]/15 transition-all w-full">
                             <InputGroupInput
                                 id="currentPassword"
                                 type={passwordVisibility ? "text" : "password"}
                                 placeholder="Enter your current password"
                                 value={password}
-                                onChange={e => setPassword(e.target.value)}/>
-                            <InputGroupAddon className="cursor-pointer"
+                                onChange={e => setPassword(e.target.value)}
+                                className="border-none focus:ring-0 text-[#1A202E] py-2.5 px-3 placeholder:text-[#A0ABC1] w-full"
+                            />
+                            <InputGroupAddon className="cursor-pointer text-[#4A5568] hover:text-[#FD8D32] transition-colors pr-3"
                                  onClick={() => setPasswordVisibility(!passwordVisibility)} align="inline-end">
-                                {passwordVisibility ? <EyeOffIcon/> : <EyeIcon/>}
+                                {passwordVisibility ? <EyeOffIcon className="w-4 h-4"/> : <EyeIcon className="w-4 h-4"/>}
                             </InputGroupAddon>
                         </InputGroup>
-
                     </Field>
 
-                    <Field className="max-w-sm my-4">
-                        <FieldLabel htmlFor="newPassword">
-                            <p className="text-center text-xl font-extrabold">
-                                Insert your new password:
-                            </p>
+                    <Field className="w-full">
+                        <FieldLabel htmlFor="newPassword" className="text-[#1A202E] font-semibold text-sm mb-1.5 block">
+                            New Password
                         </FieldLabel>
-                        <InputGroup>
+                        <InputGroup className="bg-white border-[#D8DADC] rounded-lg focus-within:border-[#FD8D32] focus-within:ring-2 focus-within:ring-[#FD8D32]/15 transition-all w-full">
                             <InputGroupInput
                                 id="newPassword"
                                 type={newPasswordVisibility ? "text" : "password"}
                                 placeholder="Enter your new password"
                                 value={newPassword}
-                                onChange={e => setNewPassword(e.target.value)}/>
-                            <InputGroupAddon className="cursor-pointer"
+                                onChange={e => setNewPassword(e.target.value)}
+                                className="border-none focus:ring-0 text-[#1A202E] py-2.5 px-3 placeholder:text-[#A0ABC1] w-full"
+                            />
+                            <InputGroupAddon className="cursor-pointer text-[#4A5568] hover:text-[#FD8D32] transition-colors pr-3"
                                              onClick={() => setNewPasswordVisibility(!newPasswordVisibility)} align="inline-end">
-                                {newPasswordVisibility ? <EyeOffIcon/> : <EyeIcon/>}
+                                {newPasswordVisibility ? <EyeOffIcon className="w-4 h-4"/> : <EyeIcon className="w-4 h-4"/>}
                             </InputGroupAddon>
                         </InputGroup>
-                        <div className="text-sm text-red-500 mt-2">
-                            {newPasswordError}
-                        </div>
+                        {newPasswordError && (
+                            <div className={`text-sm mt-2 font-medium ${typeof newPasswordError === 'string' && newPasswordError.includes('successfully') ? 'text-[#954A00]' : 'text-[#BA1A1A]'}`}>
+                                {newPasswordError}
+                            </div>
+                        )}
                     </Field>
 
-                    <Field className="max-w-sm my-4">
-                        <FieldLabel htmlFor="confirmNewPassword">
-                            <p className="text-center text-xl font-extrabold">
-                                Confirm your new password:
-                            </p>
+                    <Field className="w-full">
+                        <FieldLabel htmlFor="confirmNewPassword" className="text-[#1A202E] font-semibold text-sm mb-1.5 block">
+                            Confirm New Password
                         </FieldLabel>
-                        <InputGroup>
+                        <InputGroup className="bg-white border-[#D8DADC] rounded-lg focus-within:border-[#FD8D32] focus-within:ring-2 focus-within:ring-[#FD8D32]/15 transition-all w-full">
                             <InputGroupInput
                                 id="confirmNewPassword"
                                 type={confirmNewPasswordVisibility ? "text" : "password"}
                                 placeholder="Confirm your new password"
                                 value={confirmNewPassword}
-                                onChange={e => setConfirmNewPassword(e.target.value)}/>
-                            <InputGroupAddon className="cursor-pointer"
+                                onChange={e => setConfirmNewPassword(e.target.value)}
+                                className="border-none focus:ring-0 text-[#1A202E] py-2.5 px-3 placeholder:text-[#A0ABC1] w-full"
+                            />
+                            <InputGroupAddon className="cursor-pointer text-[#4A5568] hover:text-[#FD8D32] transition-colors pr-3"
                                              onClick={() => setConfirmNewPasswordVisibility(!confirmNewPasswordVisibility)} align="inline-end">
-                                {confirmNewPasswordVisibility ? <EyeOffIcon/> : <EyeIcon/>}
+                                {confirmNewPasswordVisibility ? <EyeOffIcon className="w-4 h-4"/> : <EyeIcon className="w-4 h-4"/>}
                             </InputGroupAddon>
                         </InputGroup>
-                        <FieldDescription htmlFor="confirmNewPassword">
-                            {confirmNewPasswordError}
-                        </FieldDescription>
+                        {confirmNewPasswordError && (
+                            <FieldDescription htmlFor="confirmNewPassword" className="text-[#BA1A1A] mt-1.5 font-medium">
+                                {confirmNewPasswordError}
+                            </FieldDescription>
+                        )}
                     </Field>
 
-                    <Button className="cursor-pointer" type="submit" variant="outline">Change password</Button>
+                    <Button 
+                        className="cursor-pointer bg-[#FD8D32] hover:bg-[#e07a28] text-white font-medium rounded-lg px-6 py-2.5 w-full sm:w-auto mt-2 transition-all hover:-translate-y-0.5" 
+                        type="submit"
+                        disabled={isSubmitting}
+                    >
+                        {isSubmitting ? "Updating..." : "Change Password"}
+                    </Button>
                 </form>
             </FieldGroup>)
 

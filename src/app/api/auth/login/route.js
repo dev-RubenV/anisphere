@@ -8,14 +8,14 @@ export async function POST(request) {
         const { email, password } = await request.json();
 
         const client = await clientPromise;
-        const user = await client.db("anilog").collection("users").findOne({ email: email.toLowerCase() });
+        const user = await client.db("anisphere").collection("users").findOne({ email: email.toLowerCase() });
 
         if (!user || !(await bcrypt.compare(password, user.password))) {
             return NextResponse.json({ error: "Credenciais inválidas" }, { status: 401 });
         }
 
         // Atualiza último login
-        await client.db("anilog").collection("users").updateOne(
+        await client.db("anisphere").collection("users").updateOne(
             { _id: user._id },
             { $set: { lastLoginAt: new Date() } }
         );
