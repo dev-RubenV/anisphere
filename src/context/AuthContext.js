@@ -68,6 +68,13 @@ export const AuthProvider = ({ children }) => {
                 }),
             });
 
+            // Se registos estiverem desativados, fazer logout do Firebase
+            if (res.status === 403) {
+                await signOut(auth);
+                setUser(null);
+                throw new Error("Registrations are currently disabled");
+            }
+
             const data = await res.json();
 
             // Se API devolver o utilizador, atualizar o estado com o isPublic do MongoDB
@@ -130,9 +137,6 @@ export const AuthProvider = ({ children }) => {
      * @throws {Error} Se o registo falhar
      */
     const register = async (email, password, displayName) => {
-
-        if(!process.env.ALLOW_ACCOUNT_CREATION) throw new Error("Registrations are currently disabled");
-
         // Faz POST para a API de registo
         const response = await fetch("/api/auth/register", {
             method: "POST",

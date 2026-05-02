@@ -19,6 +19,11 @@ export async function POST(request) {
         const usersCollection = db.collection("users");
 
         const existingUser = await usersCollection.findOne({ firebaseUid: uid });
+
+        // Bloquear criação de novas contas se registos estiverem desativados
+        if (!existingUser && process.env.ALLOW_ACCOUNT_CREATION === "0") {
+            return NextResponse.json({ error: "Registrations are currently disabled" }, { status: 403 });
+        }
         let generatedUsername;
         let isUnique = false;
 

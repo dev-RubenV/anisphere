@@ -9,7 +9,7 @@ export async function POST(request) {
     try {
         const { email, password, displayName } = await request.json();
 
-        if(process.env.ALLOW_ACCOUNT_CREATION) return NextResponse.json({ error: "Registrations are currently disabled"}, {status: 400})
+        if(process.env.ALLOW_ACCOUNT_CREATION === "0") return NextResponse.json({ error: "Registrations are currently disabled"}, {status: 403})
 
         if (!email || !displayName || !password || password.length < 6) {
             return NextResponse.json({ error: "Dados inválidos" }, { status: 400 });
