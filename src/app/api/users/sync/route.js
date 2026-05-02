@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb";
 import { cookies } from "next/headers";
+import { setAuthCookie } from "@/lib/cookies";
 import { generateFromEmail, generateUsername, uniqueUsernameGenerator, adjectives, nouns } from "unique-username-generator";
 
 export async function POST(request) {
@@ -61,18 +62,12 @@ export async function POST(request) {
 
         //Definir um cookie que o servidor consegue ler depois
         const cookieStore = await cookies();
-        cookieStore.set({
-            name: 'userId',
-            value: uid,
-            httpOnly: true, // Mais segurança
-            path: '/',
-            maxAge: 60 * 60 * 24 * 7 // 1 semana
-        });
+        setAuthCookie(cookieStore, uid);
 
         // 3. Fetch the updated user to return isPublic
         const updatedUser = await usersCollection.findOne(
             { firebaseUid: uid },
-            { projection: { displayName: 1, email: 1, isPublic: 1, photoURL: 1, _id: 0 } }
+            { projection: { displayName: 1, email: 1, isPublic: 1, photoURL: 1, createdAt: 1, _id: 0 } }
         );
 
         // 4. Responder ao cliente

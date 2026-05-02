@@ -1,34 +1,29 @@
+import { NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb";
-import {NextResponse} from "next/server";
 import bcrypt from "bcryptjs";
-import {cookies} from "next/headers";
+import { getAuthenticatedUser } from "@/lib/auth";
 
 
 export async function POST(request) {
     try{
-        const { newPassword, password, email } = await request.json();
+        // Autenticação via cookie httpOnly — nunca confiar no email do body
+        const currentUser = await getAuthenticatedUser();
+        if (!currentUser) {
+            return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+        }
+
+        const { newPassword, password } = await request.json();
 
         // Barreira de segurança para prevenir Operator Injections
         if (
-            typeof email !== "string" ||
             typeof password !== "string" ||
             typeof newPassword !== "string"
         ) {
             return NextResponse.json({ error: "Invalid data format" }, { status: 400 });
         }
 
-        const hashedNewPassword = await bcrypt.hash(newPassword, 12);
-
         if(newPassword === password){
             return NextResponse.json({ error: "Password needs to be different from the original" }, {status: 400});
-        }
-
-        const client = await clientPromise;
-        const usersCollection = await client.db("anisphere").collection("users");
-        const currentUser = await usersCollection.findOne({ email: email });
-
-        if (!currentUser) {
-            return NextResponse.json({ error: "User not found" }, { status: 404 });
         }
 
         if(currentUser.provider === "google") {
@@ -39,13 +34,19 @@ export async function POST(request) {
             return NextResponse.json({ error: "Password is incorrect!" }, { status: 400 });
         }
 
+        const hashedNewPassword = await bcrypt.hash(newPassword, 12);
+
+        const client = await clientPromise;
+        const usersCollection = client.db("anisphere").collection("users");
+
         await usersCollection.updateOne(
-        {email: email},
-        {$set: { password: hashedNewPassword } },
+            {_id: currentUser._id},
+            {$set: { password: hashedNewPassword } },
         );
 
         return NextResponse.json({ message: "Password updated successfully" });
     } catch (error) {
-        return NextResponse.json({ error: error }, { status: 500});
+        console.error("Update password error:", error);
+        return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }
 }

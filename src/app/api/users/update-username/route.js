@@ -1,25 +1,23 @@
+import { NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb";
-import {NextResponse} from "next/server";
 import bcrypt from "bcryptjs";
-import {cookies} from "next/headers";
+import { getAuthenticatedUser } from "@/lib/auth";
+import { escapeRegExp } from "@/lib/utils";
 
 
 export async function POST(request) {
 
     try {
-        const { newUsername, password, email} = await request.json();
-
-        if (typeof email !== "string" || typeof newUsername !== "string" || (password && typeof password !== "string")) {
-            return NextResponse.json({ error: "Invalid data format" }, { status: 400 });
+        // Autenticação via cookie httpOnly — nunca confiar no email do body
+        const currentUser = await getAuthenticatedUser();
+        if (!currentUser) {
+            return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
         }
 
-        const client = await clientPromise;
-        const usersCollection = await client.db("anisphere").collection("users");
-        const currentUser = await usersCollection.findOne({email: email});
+        const { newUsername, password } = await request.json();
 
-
-        if (!currentUser) {
-            return NextResponse.json({ error: "User not found" }, { status: 404 });
+        if (typeof newUsername !== "string" || (password && typeof password !== "string")) {
+            return NextResponse.json({ error: "Invalid data format" }, { status: 400 });
         }
 
         if(currentUser.provider !== "google") {
@@ -28,8 +26,13 @@ export async function POST(request) {
             }
         }
 
+        // Escape de regex para prevenir ReDoS
         const cleanUsername = newUsername.trim();
-        const usernameRegex = { $regex: new RegExp(`^${cleanUsername}$`, 'i') };
+        const safeUsername = escapeRegExp(cleanUsername);
+        const usernameRegex = { $regex: new RegExp(`^${safeUsername}$`, 'i') };
+
+        const client = await clientPromise;
+        const usersCollection = client.db("anisphere").collection("users");
 
         const checkUsernameAvailability = await usersCollection.findOne({ displayName: usernameRegex});
 
@@ -38,21 +41,13 @@ export async function POST(request) {
         }
 
         await usersCollection.updateOne(
-            {email: email},
+            {_id: currentUser._id},
             {$set: {displayName: newUsername}},
         );
 
-        const cookieStore = await cookies();
-        cookieStore.set({
-            name: 'userId',
-            value: currentUser._id.toString(),
-            httpOnly: true, // Mais segurança
-            path: '/',
-            maxAge: 60 * 60 * 24 * 7 // 1 semana
-        });
-
         return NextResponse.json({ message: "Username updated successfully" });
     } catch (error) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        console.error("Update username error:", error);
+        return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }
 }

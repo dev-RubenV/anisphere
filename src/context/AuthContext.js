@@ -76,6 +76,7 @@ export const AuthProvider = ({ children }) => {
                     ...prev,
                     displayName: data.user.displayName,
                     isPublic: data.user.isPublic,
+                    createdAt: data.user.createdAt,
                 }));
             }
         } catch (error) {
@@ -129,6 +130,9 @@ export const AuthProvider = ({ children }) => {
      * @throws {Error} Se o registo falhar
      */
     const register = async (email, password, displayName) => {
+
+        if(!process.env.ALLOW_ACCOUNT_CREATION) throw new Error("Registrations are currently disabled");
+
         // Faz POST para a API de registo
         const response = await fetch("/api/auth/register", {
             method: "POST",
@@ -139,7 +143,7 @@ export const AuthProvider = ({ children }) => {
         const data = await response.json();
 
         if (!response.ok) {
-            throw new Error(data.error || "Erro ao registar");
+            throw new Error(data.error || "Error during registration");
         }
 
         // Após registo bem-sucedido, faz login automático

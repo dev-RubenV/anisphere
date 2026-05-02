@@ -2,10 +2,16 @@ import { NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb";
 import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
+import { setAuthCookie } from "@/lib/cookies";
 
 export async function POST(request) {
     try {
         const { email, password } = await request.json();
+
+        // Barreira contra NoSQL injection — garante que ambos são strings
+        if (typeof email !== "string" || typeof password !== "string") {
+            return NextResponse.json({ error: "Dados inválidos" }, { status: 400 });
+        }
 
         const client = await clientPromise;
         const user = await client.db("anisphere").collection("users").findOne({ email: email.toLowerCase() });
@@ -21,13 +27,7 @@ export async function POST(request) {
         );
 
         const cookieStore = await cookies();
-        cookieStore.set({
-            name: 'userId',
-            value: user._id.toString(),
-            httpOnly: true, // Mais segurança
-            path: '/',
-            maxAge: 60 * 60 * 24 * 7 // 1 semana
-        });
+        setAuthCookie(cookieStore, user._id.toString());
 
         return NextResponse.json({
             success: true,

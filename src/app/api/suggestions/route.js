@@ -1,15 +1,11 @@
 import clientPromise from "@/lib/mongodb";
 import { NextResponse } from "next/server";
+import { getAuthenticatedUser, getUserIdForStorage } from "@/lib/auth";
 
-/**
- * Enriches a suggestion title with data from the Jikan API (MAL).
- * Returns image_url, mal_id, and url for the anime if found.
- */
 async function enrichWithJikan(title) {
     try {
         const encoded = encodeURIComponent(title);
         const res = await fetch(`https://api.jikan.moe/v4/anime?q=${encoded}&limit=1`, {
-            // Jikan has rate limiting (3 req/sec), so we give it a bit of time
             next: { revalidate: 0 }
         });
         if (!res.ok) return null;
@@ -30,23 +26,22 @@ async function enrichWithJikan(title) {
     }
 }
 
-/**
- * POST /api/suggestions
- * Body: { userId, suggestions: [{title, reason, mal_id}], message }
- * Enriches each suggestion with Jikan data, then saves to MongoDB.
- */
 export async function POST(request) {
     try {
-        const { userId, suggestions, message } = await request.json();
+        const currentUser = await getAuthenticatedUser();
+        if (!currentUser) {
+            return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+        }
 
-        if (!userId || !Array.isArray(suggestions) || suggestions.length === 0) {
+        const userId = getUserIdForStorage(currentUser);
+        const { suggestions, message } = await request.json();
+
+        if (!Array.isArray(suggestions) || suggestions.length === 0) {
             return NextResponse.json({ error: "Missing data" }, { status: 400 });
         }
 
-        // Enrich each suggestion with Jikan data sequentially to respect rate limits
         const enriched = [];
         for (const s of suggestions) {
-            // Add a small delay between requests to respect Jikan rate limit (3/s)
             if (enriched.length > 0) {
                 await new Promise((r) => setTimeout(r, 400));
             }
@@ -67,14 +62,12 @@ export async function POST(request) {
         const client = await clientPromise;
         const db = client.db("anisphere");
 
-        const doc = {
+        await db.collection("suggestions").insertOne({
             userId,
             message,
             suggestions: enriched,
             createdAt: new Date(),
-        };
-
-        await db.collection("suggestions").insertOne(doc);
+        });
 
         return NextResponse.json({ success: true, suggestions: enriched }, { status: 201 });
     } catch (error) {
@@ -83,10 +76,6 @@ export async function POST(request) {
     }
 }
 
-/**
- * GET /api/suggestions?userId=xxx&limit=5
- * Returns the most recent suggestion sessions for a user.
- */
 export async function GET(request) {
     try {
         const { searchParams } = new URL(request.url);

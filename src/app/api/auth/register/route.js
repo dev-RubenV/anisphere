@@ -2,12 +2,21 @@ import { NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb";
 import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
+import { setAuthCookie } from "@/lib/cookies";
+import { escapeRegExp } from "@/lib/utils";
 
 export async function POST(request) {
     try {
         const { email, password, displayName } = await request.json();
 
+        if(process.env.ALLOW_ACCOUNT_CREATION) return NextResponse.json({ error: "Registrations are currently disabled"}, {status: 400})
+
         if (!email || !displayName || !password || password.length < 6) {
+            return NextResponse.json({ error: "Dados inválidos" }, { status: 400 });
+        }
+
+        // Barreira contra NoSQL injection
+        if (typeof email !== "string" || typeof password !== "string" || typeof displayName !== "string") {
             return NextResponse.json({ error: "Dados inválidos" }, { status: 400 });
         }
 
@@ -20,13 +29,14 @@ export async function POST(request) {
             return NextResponse.json({ error: "Email já registado" }, { status: 400 });
         }
 
-        // Verifica username duplicado
+        // Verifica username duplicado (com escape de regex para prevenir ReDoS)
         const cleanUsername = displayName.trim();
-        const usernameRegex = { $regex: new RegExp(`^${cleanUsername}$`, 'i') };
+        const safeUsername = escapeRegExp(cleanUsername);
+        const usernameRegex = { $regex: new RegExp(`^${safeUsername}$`, 'i') };
 
         const checkUsernameAvailability = await db.collection("users").findOne({ displayName: usernameRegex});
 
-        if (checkUsernameAvailability && checkUsernameAvailability._id.toString() !== currentUser._id.toString()) {
+        if (checkUsernameAvailability) {
             return NextResponse.json({ error: "Username already exists" }, { status: 400 });
         }
         const hashedPassword = await bcrypt.hash(password, 12);
@@ -49,13 +59,7 @@ export async function POST(request) {
         );
 
         const cookieStore = await cookies();
-        cookieStore.set({
-            name: 'userId',
-            value: user._id.toString(),
-            httpOnly: true, // Mais segurança
-            path: '/',
-            maxAge: 60 * 60 * 24 * 7 // 1 semana
-        });
+        setAuthCookie(cookieStore, user._id.toString());
 
         return NextResponse.json({
             success: true,

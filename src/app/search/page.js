@@ -20,6 +20,7 @@ import {AddToFavoritesButton} from "@/components/AddToFavoritesButton";
 import clientPromise from "@/lib/mongodb";
 import { headers, cookies } from "next/headers";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { escapeRegExp } from "@/lib/utils";
 import * as React from "react";
 
 export default async function AnimeSearchPage({ searchParams }) {
@@ -38,7 +39,7 @@ export default async function AnimeSearchPage({ searchParams }) {
 
         usersCollection.find({
             displayName: {
-                $regex: q,
+                $regex: escapeRegExp(q),
                 $options: "i"}
         }).project({
             displayName: 1,

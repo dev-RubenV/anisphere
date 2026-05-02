@@ -1,32 +1,21 @@
+import { NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb";
-import {NextResponse} from "next/server";
 import bcrypt from "bcryptjs";
-import {cookies} from "next/headers";
-import { ObjectId } from "mongodb";
+import { cookies } from "next/headers";
+import { getAuthenticatedUser, getUserIdForStorage } from "@/lib/auth";
 
 export async function DELETE(request){
     try {
-        const {password, userId} = await request.json();
+        // Autenticação via cookie httpOnly — nunca confiar no userId do body
+        const currentUser = await getAuthenticatedUser();
+        if (!currentUser) {
+            return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+        }
 
-        if (typeof userId !== "string" || (password && typeof password !== "string")) {
+        const { password } = await request.json();
+
+        if (password && typeof password !== "string") {
             return NextResponse.json({ error: "Invalid data format" }, { status: 400 });
-        }
-
-        let userQuery;
-
-        // Se for um ID válido do MongoDB (exatamente 24 caracteres hexadecimais)
-        if(ObjectId.isValid(userId) && String(new ObjectId(userId)) === userId){
-            userQuery = { _id: new ObjectId(userId) };
-        } else {
-            userQuery = { firebaseUid: userId };
-        }
-
-        const client = await clientPromise;
-        const usersCollection = await client.db("anisphere").collection("users");
-        const currentUser = await usersCollection.findOne(userQuery);
-
-        if (!currentUser){
-            return NextResponse.json({error: "User not found"}, {status: 404});
         }
 
         if(currentUser.provider !== "google") {
@@ -35,12 +24,22 @@ export async function DELETE(request){
             }
         }
 
-        await client.db("anisphere").collection("watchlist").deleteMany({ userId: userId });
+        const client = await clientPromise;
 
-        await usersCollection.deleteOne(userQuery);
+        // Usa o userId correto para queries na coleção watchlist
+        const storageId = getUserIdForStorage(currentUser);
+        await client.db("anisphere").collection("watchlist").deleteMany({ userId: storageId });
+        await client.db("anisphere").collection("suggestions").deleteMany({ userId: storageId });
+
+        await client.db("anisphere").collection("users").deleteOne({ _id: currentUser._id });
+
+        // Limpar o cookie de sessão
+        const cookieStore = await cookies();
+        cookieStore.delete('userId');
 
         return NextResponse.json({message: "Your account has been deleted successfully"});
     } catch (error) {
-        return NextResponse.json({error: error.message}, { status: 500 });
+        console.error("Delete account error:", error);
+        return NextResponse.json({error: "Internal server error"}, { status: 500 });
     }
 }

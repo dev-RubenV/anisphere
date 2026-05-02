@@ -2,12 +2,21 @@ import clientPromise from "@/lib/mongodb";
 import {NextResponse} from "next/server";
 import {cookies} from "next/headers";
 import {ObjectId} from "mongodb";
+import { getAuthenticatedUser, getUserIdForStorage } from "@/lib/auth";
 
 export async function DELETE(request){
  try {
-     const {anime, userId} = await request.json();
-     if(!userId || !anime.mal_id){
-         return NextResponse.json({status: "User or Anime ID missing"}, {status: 400});
+     // Autenticação via cookie — nunca confiar no userId do body
+     const currentUser = await getAuthenticatedUser();
+     if (!currentUser) {
+         return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+     }
+
+     const userId = getUserIdForStorage(currentUser);
+     const { anime } = await request.json();
+
+     if(!anime?.mal_id){
+         return NextResponse.json({error: "Anime ID missing"}, {status: 400});
      }
 
      const client = await clientPromise;
@@ -27,14 +36,23 @@ export async function DELETE(request){
 
     }
     catch(error) {
-        return NextResponse.json( {error: "Failed to remove data"}, error);}
+        return NextResponse.json( {error: "Failed to remove data"}, {status: 500});}
     }
 
 export async function POST(request){
     try {
-        const { anime, userId, username, user_score, status, notes, progress, isFavorite} = await request.json();
+        // Autenticação via cookie — nunca confiar no userId do body
+        const currentUser = await getAuthenticatedUser();
+        if (!currentUser) {
+            return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+        }
 
-        if (!userId || !anime || !anime.mal_id || user_score === undefined || progress === undefined) {
+        const userId = getUserIdForStorage(currentUser);
+        const username = currentUser.displayName;
+
+        const { anime, user_score, status, notes, progress, isFavorite} = await request.json();
+
+        if (!anime || !anime.mal_id || user_score === undefined || progress === undefined) {
             return NextResponse.json({ error: "Missing data" }, { status: 400 });
         }
 
