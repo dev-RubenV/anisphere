@@ -6,6 +6,9 @@ async function enrichWithJikan(title) {
     try {
         const encoded = encodeURIComponent(title);
         const res = await fetch(`https://api.jikan.moe/v4/anime?q=${encoded}&limit=1`, {
+            headers: {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/[IP_ADDRESS] Safari/537.36"
+            },
             next: { revalidate: 0 }
         });
         if (!res.ok) return null;
