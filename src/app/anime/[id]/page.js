@@ -13,7 +13,11 @@ export default async function AnimeDetailPage({ params }) {
     const { id } = await params;
     let userData = null;
 
-    const response = await fetch(`https://api.jikan.moe/v4/anime/${id}`);
+    const response = await fetch(`https://api.jikan.moe/v4/anime/${id}`, {
+        headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        }
+    });
     const data = await response.json();
     const anime = data.data;
 

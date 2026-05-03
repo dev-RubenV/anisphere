@@ -35,7 +35,11 @@ export default async function AnimeSearchPage({ searchParams }) {
     const usersCollection = await db.collection("users");
 
     const [animeResponse, usersResult] = await Promise.all([
-        fetch(`https://api.jikan.moe/v4/anime?q=${q}`),
+        fetch(`https://api.jikan.moe/v4/anime?q=${q}`, {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            }
+        }),
 
         usersCollection.find({
             displayName: {
