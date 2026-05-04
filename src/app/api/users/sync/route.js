@@ -55,21 +55,21 @@ export async function POST(request) {
                 },
                 $setOnInsert: {
                     isPublic: true,
-                    email: email, // Só define isto se for criar um novo
+                    email: email, // Só define isto ao criar um novo utilizador
                     displayName: generatedUsername || null,
                     firebaseUid: uid,
                     createdAt: new Date(),
                     provider: provider || "google",
                 },
             },
-            { upsert: true } // A opção que cria se não existir
+            { upsert: true } // A opção que cria o documento se não existir
         );
 
         //Definir um cookie que o servidor consegue ler depois
         const cookieStore = await cookies();
         setAuthCookie(cookieStore, uid);
 
-        // 3. Fetch the updated user to return isPublic
+        // 3. Busca o utilizador atualizado para devolver o isPublic
         const updatedUser = await usersCollection.findOne(
             { firebaseUid: uid },
             { projection: { displayName: 1, email: 1, isPublic: 1, photoURL: 1, createdAt: 1, _id: 0 } }

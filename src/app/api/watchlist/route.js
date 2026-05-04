@@ -6,7 +6,7 @@ import { getAuthenticatedUser, getUserIdForStorage } from "@/lib/auth";
 
 export async function DELETE(request){
  try {
-     // Autenticação via cookie — nunca confiar no userId do body
+     // Autenticação via cookie ou bearer token
      const currentUser = await getAuthenticatedUser();
      if (!currentUser) {
          return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
@@ -41,7 +41,7 @@ export async function DELETE(request){
 
 export async function POST(request){
     try {
-        // Autenticação via cookie — nunca confiar no userId do body
+        // Autenticação via cookie ou bearer token
         const currentUser = await getAuthenticatedUser();
         if (!currentUser) {
             return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
@@ -111,7 +111,7 @@ export async function GET(request){
         const client = await clientPromise;
         const db = client.db("anisphere");
 
-        // Privacy enforcement: when fetching by username, check if the profile is public
+        // Verificação de privacidade: ao buscar por username, verifica se o perfil é público
         if (username) {
             const profileOwner = await db.collection("users").findOne(
                 { displayName: username },
@@ -119,16 +119,15 @@ export async function GET(request){
             );
 
             if (profileOwner && profileOwner.isPublic === false) {
-                // Allow the owner to see their own list
-                const cookieStore = await cookies();
-                const cookieUserId = cookieStore.get("userId")?.value;
-
+                // Verificar se o pedido vem do dono do perfil
+                // Suporta tanto cookie como bearer token via getAuthenticatedUser
+                const currentUser = await getAuthenticatedUser();
                 let isOwner = false;
-                if (cookieUserId) {
-                    // Check if cookie matches _id or firebaseUid
+
+                if (currentUser) {
                     isOwner = (
-                        profileOwner._id.toString() === cookieUserId ||
-                        profileOwner.firebaseUid === cookieUserId
+                        profileOwner._id.toString() === currentUser._id.toString() ||
+                        profileOwner.firebaseUid === currentUser.firebaseUid
                     );
                 }
 

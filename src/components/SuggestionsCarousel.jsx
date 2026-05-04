@@ -5,14 +5,14 @@ import { ChevronLeft, ChevronRight, ExternalLink, Star, Tv, Sparkles } from "luc
 import Link from "next/link";
 
 /**
- * A single suggestion card displayed inside the carousel.
+ * Um único cartão de sugestão exibido dentro do carrossel.
  */
 function SuggestionCard({ suggestion, index, total }) {
     const { title, title_english, reason, image_url, url, score, episodes, genres, mal_id } = suggestion;
 
     return (
         <div className="suggestion-card">
-            {/* Left: Anime Poster */}
+            {/* Esquerda: Poster do Anime */}
             <div className="suggestion-card__poster-wrap">
                 {image_url ? (
                     <img
@@ -25,18 +25,18 @@ function SuggestionCard({ suggestion, index, total }) {
                         <Sparkles className="w-10 h-10 text-[#FD8D32]/40" />
                     </div>
                 )}
-                {/* Counter badge */}
+                {/* Emblema do contador */}
                 <span className="suggestion-card__badge">
                     {index + 1} / {total}
                 </span>
             </div>
 
-            {/* Right: Info */}
+            {/* Direita: Informações */}
             <div className="suggestion-card__info">
-                {/* Title */}
+                {/* Título */}
                 <h3 className="suggestion-card__title">{title_english || title}</h3>
 
-                {/* Meta row */}
+                {/* Linha de metadados */}
                 <div className="suggestion-card__meta">
                     {score && (
                         <span className="suggestion-card__meta-pill suggestion-card__meta-pill--score">
@@ -57,10 +57,10 @@ function SuggestionCard({ suggestion, index, total }) {
                     ))}
                 </div>
 
-                {/* AI reason */}
+                {/* Razão da IA */}
                 <p className="suggestion-card__reason">{reason}</p>
 
-                {/* Internal anime detail link */}
+                {/* Link interno para a página de detalhe do anime */}
                 {mal_id ? (
                     <Link
                         href={`/anime/${mal_id}`}
@@ -80,10 +80,10 @@ function SuggestionCard({ suggestion, index, total }) {
 }
 
 /**
- * Main carousel wrapper.
+ * Wrapper principal do carrossel.
  * Props:
- *   suggestions – array of enriched suggestion objects
- *   message     – the AI's intro message
+ *   suggestions – array de objetos de sugestão enriquecidos
+ *   message     – a mensagem introdutória da IA
  */
 export function SuggestionsCarousel({ suggestions, message }) {
     const [active, setActive] = useState(0);
@@ -96,15 +96,15 @@ export function SuggestionsCarousel({ suggestions, message }) {
 
     return (
         <div className="suggestions-carousel">
-            {/* Header */}
+            {/* Cabeçalho */}
             <div className="suggestions-carousel__header">
                 <Sparkles className="w-5 h-5 text-[#FD8D32]" />
                 <p className="suggestions-carousel__message">{message}</p>
             </div>
 
-            {/* Card area */}
+            {/* Área do cartão */}
             <div className="suggestions-carousel__stage">
-                {/* Prev button */}
+                {/* Botão anterior */}
                 <button
                     onClick={prev}
                     className="suggestions-carousel__nav suggestions-carousel__nav--prev"
@@ -113,7 +113,7 @@ export function SuggestionsCarousel({ suggestions, message }) {
                     <ChevronLeft className="w-5 h-5" />
                 </button>
 
-                {/* The active card */}
+                {/* O cartão ativo */}
                 <div className="suggestions-carousel__card-wrap">
                     <SuggestionCard
                         key={active}
@@ -123,7 +123,7 @@ export function SuggestionsCarousel({ suggestions, message }) {
                     />
                 </div>
 
-                {/* Next button */}
+                {/* Botão seguinte */}
                 <button
                     onClick={next}
                     className="suggestions-carousel__nav suggestions-carousel__nav--next"
@@ -133,7 +133,7 @@ export function SuggestionsCarousel({ suggestions, message }) {
                 </button>
             </div>
 
-            {/* Dot indicators */}
+            {/* Indicadores de pontos */}
             <div className="suggestions-carousel__dots">
                 {suggestions.map((_, i) => (
                     <button

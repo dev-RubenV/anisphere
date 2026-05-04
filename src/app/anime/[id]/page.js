@@ -29,19 +29,19 @@ export default async function AnimeDetailPage({ params }) {
 
     if (userId) {
         try {
-            // 1. Server Components need absolute URLs (http://...)
+            // 1. Server Components precisam de URLs absolutos (http://...)
             const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
-            // 2. Use GET to fetch the list (There is no "FIND" method in HTTP)
+            // 2. Usa GET para buscar a lista (Não existe método "FIND" em HTTP)
             const res = await fetch(`${baseUrl}/api/watchlist?userId=${userId}`, {
                 method: "GET",
-                cache: "no-store", // Ensures you always get the latest data
+                cache: "no-store", // Garante que obtém sempre os dados mais recentes
             });
 
             if (res.ok) {
-                const watchlist = await res.json(); // 3. You must await .json()
+                const watchlist = await res.json(); // 3. É obrigatório usar await no .json()
 
-                // 4. Manually find this specific anime in the returned list
+                // 4. Procura manualmente este anime específico na lista retornada
                 userData = watchlist.find((item) => item.mal_id === anime.mal_id) || null;
             }
         } catch (error) {
@@ -52,10 +52,10 @@ export default async function AnimeDetailPage({ params }) {
     return (
         <div className="w-full pb-20 selection:bg-[#FD8D32]/30">
             <div className="max-w-6xl mx-auto space-y-8">
-                {/* Top Section: Grid Layout for Poster and Main Info */}
+                {/* Secção Superior: Layout em grelha para o Poster e Informações Principais */}
                 <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8">
 
-                    {/* Left Column: Poster & Quick Actions */}
+                    {/* Coluna Esquerda: Poster e Ações Rápidas */}
                     <div className="md:col-span-1 flex flex-col gap-5">
                         <div className="relative group">
                             <img
@@ -66,7 +66,7 @@ export default async function AnimeDetailPage({ params }) {
                             <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-[#DCC1B1]/30" />
                         </div>
 
-                        {/* Action Buttons */}
+                        {/* Botões de Ação */}
                         <div className="grid grid-cols-2 gap-3">
                             {anime.trailer?.url && (
                                 <Button
@@ -85,7 +85,7 @@ export default async function AnimeDetailPage({ params }) {
                             </div>
                         </div>
 
-                        {/* Quick Information Card */}
+                        {/* Cartão de Informação Rápida */}
                         <div className="aura-card p-5 space-y-4 text-sm mt-2">
                             <div className="flex justify-between items-center">
                                 <span className="text-[#4A5568] font-medium">Episodes</span>
@@ -109,10 +109,10 @@ export default async function AnimeDetailPage({ params }) {
                         </div>
                     </div>
 
-                    {/* Right Column: Content Details */}
+                    {/* Coluna Direita: Detalhes do Conteúdo */}
                     <div className="md:col-span-2 lg:col-span-3 space-y-8">
 
-                        {/* Header Area */}
+                        {/* Área do Cabeçalho */}
                         <div className="space-y-5">
                             <div>
                                 <div className="flex flex-wrap gap-2 mb-4">
@@ -138,7 +138,7 @@ export default async function AnimeDetailPage({ params }) {
                                 </h2>
                             </div>
 
-                            {/* Stats Row */}
+                            {/* Linha de Estatísticas */}
                             <div className="flex flex-wrap gap-6 md:gap-10 p-5 aura-card mt-6">
                                 <div className="flex items-center gap-4">
                                     <div className="p-3 bg-[#FD8D32]/10 rounded-xl">
@@ -176,7 +176,7 @@ export default async function AnimeDetailPage({ params }) {
                             </div>
                         </div>
 
-                        {/* Synopsis */}
+                        {/* Sinopse */}
                         <div className="aura-card p-6 md:p-8 space-y-4">
                             <h3 className="headline-md">Synopsis</h3>
                             <p className="text-[#4A5568] leading-relaxed text-[15px] md:text-base whitespace-pre-wrap">
@@ -184,10 +184,10 @@ export default async function AnimeDetailPage({ params }) {
                             </p>
                         </div>
 
-                        {/* Additional Info Grid */}
+                        {/* Grelha de Informações Adicionais */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
 
-                            {/* Broadcast Info */}
+                            {/* Informações de Transmissão */}
                             <div className="aura-card p-5 space-y-5">
                                 <div className="flex items-start gap-4">
                                     <div className="p-2 bg-[#EDF2F7] rounded-lg shrink-0 mt-0.5">
@@ -209,7 +209,7 @@ export default async function AnimeDetailPage({ params }) {
                                 </div>
                             </div>
 
-                            {/* Studios & Producers */}
+                            {/* Estúdios e Produtores */}
                             <div className="aura-card p-5 space-y-5">
                                 <div>
                                     <div className="font-semibold text-[#1A202E] mb-2 flex items-center gap-2">

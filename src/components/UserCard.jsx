@@ -65,7 +65,7 @@ export default function UserCard({animeData, username, photoURL, joinedAt}) {
 
     return (
         <div className="relative w-full mx-auto overflow-hidden rounded-2xl bg-[#eaeaea] shadow-sm border mb-8 border-primary p-6 md:p-8 flex flex-col md:flex-row items-center gap-8 justify-between">
-            {/* Background Layer */}
+            {/* Camada de Fundo */}
             {top3Favorites.length > 0 ? (
                 <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
                     {hasVideo ? (
@@ -82,14 +82,14 @@ export default function UserCard({animeData, username, photoURL, joinedAt}) {
                             className="object-cover opacity-30"
                         />
                     ) : null}
-                    {/* Light Overlay to ensure text readability */}
+                    {/* Sobreposição clara para garantir legibilidade do texto */}
                     <div className="absolute inset-0 bg-white/70 backdrop-blur-sm" />
                 </div>
             ) : (
                 <div className="absolute inset-0 bg-white z-0" />
             )}
 
-            {/* Content Layer - Left User Avatar */}
+            {/* Camada de Conteúdo - Avatar do Utilizador (Esquerda) */}
             <div className="relative z-10 flex-shrink-0 flex flex-col items-center text-center">
                 <Image
                     src={photoURL || "/default-avatar.png"}
@@ -104,7 +104,7 @@ export default function UserCard({animeData, username, photoURL, joinedAt}) {
                 </div>
             </div>
 
-            {/* Content Layer - Middle (Info & Stats) */}
+            {/* Camada de Conteúdo - Centro (Informações e Estatísticas) */}
             <div className="relative z-10 flex-1 flex flex-col items-center justify-center w-full">
                 <div className="flex flex-wrap justify-center gap-6 md:gap-8 text-[14px] font-semibold text-gray-700">
                     <div className="flex flex-col items-center gap-1">
@@ -130,7 +130,7 @@ export default function UserCard({animeData, username, photoURL, joinedAt}) {
                 </div>
             </div>
 
-            {/* Content Layer - Right (Top 3 Favorites) */}
+            {/* Camada de Conteúdo - Direita (Top 3 Favoritos) */}
             {top3Favorites.length > 0 && (
                 <div className="relative z-10 flex flex-col items-center justify-center pt-2">
                     <div className="flex -space-x-5 mb-3">

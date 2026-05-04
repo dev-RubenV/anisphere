@@ -11,7 +11,7 @@ import UserCard from "@/components/UserCard";
 
 export default function UserProfilePage () {
 
-    // GET THE USERNAME USING THE HOOK
+    // OBTÉM O USERNAME USANDO O HOOK
     const params = useParams();
     const username = params.id;
 
@@ -45,14 +45,14 @@ export default function UserProfilePage () {
                     fetch(`/api/users/get-user?query=${username}`),
                 ]);
 
-                // Handle private list
+                // Tratar lista privada
                 if (watchListResponse.status === 403) {
                     setIsPrivate(true);
                     setWatchlist([]);
                     return;
                 }
 
-                // Throw explicitly so the catch block can surface the real problem
+                // Lança erro explicitamente para que o catch consiga mostrar o problema real
                 if (!watchListResponse.ok) {
                     throw new Error(`Watchlist fetch failed: ${watchListResponse.status}`);
                 }
@@ -70,7 +70,7 @@ export default function UserProfilePage () {
                 setIsPrivate(false);
 
             } catch (error) {
-                // Log the ACTUAL error so you can see what's going wrong
+                // Regista o erro REAL para ser possível identificar o problema
                 console.error("Failed to fetch watchlist:", error);
             } finally {
                 setIsLoading(false);

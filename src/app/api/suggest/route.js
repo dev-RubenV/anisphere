@@ -1,8 +1,14 @@
 import { NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
+import { getAuthenticatedUser } from "@/lib/auth";
 
 export async function POST(request) {
     try {
+        // Autenticação obrigatória — apenas utilizadores autenticados podem pedir sugestões
+        const currentUser = await getAuthenticatedUser();
+        if (!currentUser) {
+            return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+        }
 
         const { currentUserAnimeData, animeData, displayName, previousSuggestions } = await request.json();
 
@@ -28,7 +34,7 @@ export async function POST(request) {
             required: ["message", "suggestions"]
         };
 
-        // Build a plain list of previously suggested titles so Gemini avoids repeating them
+        // Constrói uma lista de títulos já sugeridos para o Gemini evitar repetições
         const alreadySuggested = Array.isArray(previousSuggestions) && previousSuggestions.length > 0
             ? `You have already suggested these anime to ${displayName} in previous sessions, DO NOT suggest them again: ${previousSuggestions.join(", ")}. `
             : "";
@@ -47,7 +53,7 @@ export async function POST(request) {
 
         let response;
         try {
-             // Primary Model
+             // Modelo Primário
              response = await ai.models.generateContent({
                   model: "gemini-3-flash-preview",
                   contents: prompt,
@@ -55,7 +61,7 @@ export async function POST(request) {
              });
         } catch (error) {
              console.warn("Primary model (gemini-3-flash-preview) failed, falling back to gemini-2.5-flash:", error);
-             // Fallback Model
+             // Modelo de Fallback
              try {
                  response = await ai.models.generateContent({
                       model: "gemini-2.5-flash",

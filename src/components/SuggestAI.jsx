@@ -13,14 +13,14 @@ export function SuggestAI({ animeData }) {
     const [isLoading, setIsLoading] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
 
-    // History of suggestion sessions loaded from MongoDB
+    // Histórico de sessões de sugestões carregado do MongoDB
     const [history, setHistory] = useState([]);
     const [historyLoading, setHistoryLoading] = useState(false);
 
-    // Which history session is expanded (index into `history` array), or -1 for none
+    // Qual sessão do histórico está expandida (índice no array `history`), ou -1 para nenhuma
     const [expandedIndex, setExpandedIndex] = useState(-1);
 
-    // Load saved suggestion history when user is available
+    // Carrega o histórico de sugestões guardadas quando o utilizador está disponível
     useEffect(() => {
         if (!user) return;
         const userId = user.id || user._id;
@@ -49,16 +49,16 @@ export function SuggestAI({ animeData }) {
         setIsLoading(true);
 
         try {
-            // 1. Fetch user's watchlist
+            // 1. Busca a watchlist do utilizador
             const listRes = await fetch(`/api/watchlist?userId=${user.id || user._id}`);
             const currentUserAnimeData = await listRes.json();
 
-            // 2. Collect all previously suggested titles from history so AI avoids repeating them
+            // 2. Recolhe todos os títulos previamente sugeridos do histórico para a IA evitar repetições
             const previousSuggestions = history.flatMap(
                 (session) => session.suggestions?.map((s) => s.title_english || s.title) ?? []
             );
 
-            // 3. Ask Gemini for suggestions (passing history context)
+            // 3. Pede sugestões ao Gemini (passando o contexto do histórico)
             const aiRes = await fetch("/api/suggest", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -74,7 +74,7 @@ export function SuggestAI({ animeData }) {
             const recommendationData = await aiRes.json();
             setIsLoading(false);
 
-            // 4. Save & enrich via /api/suggestions
+            // 4. Guarda e enriquece via /api/suggestions
             setIsSaving(true);
             const saveRes = await fetch("/api/suggestions", {
                 method: "POST",
@@ -125,7 +125,7 @@ export function SuggestAI({ animeData }) {
                 }
             </Button>
 
-            {/* Loading history skeleton */}
+            {/* Esqueleto de carregamento do histórico */}
             {historyLoading && (
                 <div className="sh-skeleton-wrap">
                     {[0,1,2].map(i => (
@@ -134,17 +134,17 @@ export function SuggestAI({ animeData }) {
                 </div>
             )}
 
-            {/* Suggestion history */}
+            {/* Histórico de sugestões */}
             {!historyLoading && history.length > 0 && (
                 <div className="sh">
-                    {/* Section header */}
+                    {/* Cabeçalho da secção */}
                     <div className="sh__header">
                         <History className="w-4 h-4 text-[#FD8D32]" />
                         <span className="sh__header-label">Suggestion History</span>
                         <span className="sh__header-count">{history.length} session{history.length !== 1 ? "s" : ""}</span>
                     </div>
 
-                    {/* Sessions */}
+                    {/* Sessões */}
                     <div className="sh__list">
                         {history.map((session, i) => {
                             const isOpen = expandedIndex === i;
@@ -165,13 +165,13 @@ export function SuggestAI({ animeData }) {
 
                             return (
                                 <div key={i} className={`sh__item ${isOpen ? "sh__item--open" : ""}`}>
-                                    {/* Clickable header row */}
+                                    {/* Linha clicável do cabeçalho */}
                                     <button
                                         className="sh__row"
                                         onClick={() => setExpandedIndex(isOpen ? -1 : i)}
                                         aria-expanded={isOpen}
                                     >
-                                        {/* Stacked poster thumbnails */}
+                                        {/* Miniaturas de posters empilhadas */}
                                         <div className="sh__thumbs">
                                             {previews.map((s, pi) => (
                                                 s.image_url
@@ -192,7 +192,7 @@ export function SuggestAI({ animeData }) {
                                             ))}
                                         </div>
 
-                                        {/* Titles + date */}
+                                        {/* Títulos + data */}
                                         <div className="sh__row-info">
                                             <span className="sh__row-titles">
                                                 {previews.map((s) => s.title_english || s.title).join(" · ")}
@@ -202,7 +202,7 @@ export function SuggestAI({ animeData }) {
                                             </span>
                                         </div>
 
-                                        {/* Chevron */}
+                                        {/* Seta */}
                                         <span className="sh__chevron">
                                             {isOpen
                                                 ? <ChevronUp className="w-4 h-4" />
@@ -211,7 +211,7 @@ export function SuggestAI({ animeData }) {
                                         </span>
                                     </button>
 
-                                    {/* Expanded carousel */}
+                                    {/* Carrossel expandido */}
                                     {isOpen && (
                                         <div className="sh__body">
                                             <SuggestionsCarousel

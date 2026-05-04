@@ -12,7 +12,7 @@ export async function POST(request){
             return NextResponse.json({error: "Invalid data format"}, {status: 400});
         }
 
-        // Authenticate via httpOnly cookie
+        // Autenticação via cookie httpOnly
         const cookieStore = await cookies();
         const userId = cookieStore.get("userId")?.value;
 
@@ -23,12 +23,12 @@ export async function POST(request){
         const client = await clientPromise;
         const usersCollection = client.db("anisphere").collection("users");
 
-        // Find user by cookie userId — try both ObjectId and firebaseUid
+        // Procura o utilizador pelo userId do cookie — tenta tanto ObjectId como firebaseUid
         let user;
         try {
             user = await usersCollection.findOne({_id: new ObjectId(userId)});
         } catch (e) {
-            // Not a valid ObjectId, try as firebaseUid
+            // Não é um ObjectId válido, tenta como firebaseUid
         }
 
         if (!user) {

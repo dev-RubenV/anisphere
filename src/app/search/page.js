@@ -93,7 +93,7 @@ export default async function AnimeSearchPage({ searchParams }) {
     return (
         <div className="flex flex-col gap-10 w-full pb-20">
 
-            {/* --- USERS SECTION --- */}
+            {/* --- SECÇÃO DE UTILIZADORES --- */}
                 {usersResult.length === 0 ? null :
                  (
                  <section>
@@ -101,7 +101,7 @@ export default async function AnimeSearchPage({ searchParams }) {
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                         {usersResult.map((user, index) => (
                             <Link href={`/user/${user.displayName}`} key={index} className="aura-card flex flex-col items-center justify-center p-5 hover:-translate-y-1 hover:shadow-md transition-all gap-3 border-[#E6E8EA]">
-                                {/* Link this to your user profile page later! */}
+                                {/* Liga isto à página de perfil do utilizador! */}
                                     <Avatar className="w-16 h-16 ring-2 ring-[#FD8D32]/10 ring-offset-2">
                                         <AvatarImage
                                             src={user?.photoURL}
@@ -119,7 +119,7 @@ export default async function AnimeSearchPage({ searchParams }) {
                 </section>
                 )}
 
-            {/* --- ANIME SECTION --- */}
+            {/* --- SECÇÃO DE ANIME --- */}
             <section>
                 <h2 className="headline-md mb-4 text-[#1A202E]">Anime</h2>
                 {animeResults.length === 0 ? (

@@ -3,6 +3,7 @@ import clientPromise from "@/lib/mongodb";
 import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
 import { setAuthCookie } from "@/lib/cookies";
+import { signToken } from "@/lib/jwt";
 
 export async function POST(request) {
     try {
@@ -26,17 +27,23 @@ export async function POST(request) {
             { $set: { lastLoginAt: new Date() } }
         );
 
+        // Cookie para o web app (mantém compatibilidade)
         const cookieStore = await cookies();
         setAuthCookie(cookieStore, user._id.toString());
 
+        // JWT para clientes móveis
+        const userId = user.firebaseUid || user._id.toString();
+        const token = signToken(userId, user.displayName);
+
         return NextResponse.json({
             success: true,
+            token,
             user: {
-                id: user._id,
+                id: userId,
                 email: user.email,
                 displayName: user.displayName,
                 isPublic: user.isPublic ?? true,
-                provider: "mongodb"
+                provider: user.provider || "mongodb"
             }
         });
 

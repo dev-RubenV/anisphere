@@ -1,4 +1,4 @@
-'use client'; // Required for user interaction
+'use client'; // Obrigatório para interação do utilizador
 import Link from "next/link";
 import { useState } from 'react';
 
@@ -7,11 +7,11 @@ export default function AnimeSearch() {
     const [results, setResults] = useState([]);
 
     async function handleSearch() {
-        // 1. Call the API directly
+        // 1. Chama a API diretamente
         const response = await fetch(`https://api.jikan.moe/v4/anime?q=${query}`);
         const data = await response.json();
 
-        // 2. Jikan returns the data inside a "data" property
+        // 2. Jikan retorna os dados dentro de uma propriedade "data"
         setResults(data.data);
     }
 

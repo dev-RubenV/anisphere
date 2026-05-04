@@ -24,7 +24,7 @@ export function AddToFavoritesButton({ anime, userData }) {
 
         const newFavoriteState = !isFavorite;
         
-        // Optimistic UI update
+        // Atualização otimista da UI
         setIsFavorite(newFavoriteState);
 
         try {
@@ -48,13 +48,13 @@ export function AddToFavoritesButton({ anime, userData }) {
                 toast(newFavoriteState ? "Added to favorites!" : "Removed from favorites!");
                 router.refresh();
             } else {
-                // Revert optimistic update
+                // Reverter atualização otimista
                 setIsFavorite(!newFavoriteState);
                 toast.error("Failed to update favorites");
             }
         } catch (error) {
             console.error("Failed to toggle favorite", error);
-            // Revert optimistic update
+            // Reverter atualização otimista
             setIsFavorite(!newFavoriteState);
             toast.error("An error occurred");
         }

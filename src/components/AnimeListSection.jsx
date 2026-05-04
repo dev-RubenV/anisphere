@@ -31,17 +31,17 @@ export function AnimeListSection({ icon, title, animeList, showScore = true, sho
         if (sortBy === 'score') {
             const scoreA = a.user_score || 0;
             const scoreB = b.user_score || 0;
-            return scoreB - scoreA; // Descending
+            return scoreB - scoreA; // Descendente
         } else if (sortBy === 'episodes') {
             const epA = a.episodes || 0;
             const epB = b.episodes || 0;
-            return epB - epA; // Descending
+            return epB - epA; // Descendente
         } else if (sortBy === 'progress') {
             const progA = a.progress || 0;
             const progB = b.progress || 0;
-            return progB - progA; // Descending
+            return progB - progA; // Descendente
         }
-        return 0; // Default (Order Added)
+        return 0; // Padrão (Ordem de Adição)
     });
 
     return (
@@ -67,7 +67,7 @@ export function AnimeListSection({ icon, title, animeList, showScore = true, sho
                 </div>
             </div>
             <div className="aura-card overflow-hidden">
-                {/* Desktop table view */}
+                {/* Vista de tabela para desktop */}
                 <div className="hidden md:block">
                     <Table>
                         <TableHeader>
@@ -131,7 +131,7 @@ export function AnimeListSection({ icon, title, animeList, showScore = true, sho
                     </Table>
                 </div>
 
-                {/* Mobile card view */}
+                {/* Vista de cartões para mobile */}
                 <div className="md:hidden divide-y divide-[#F2F4F6]">
                     {sortedList.map((anime) => (
                         <div key={anime.mal_id} className="flex items-center gap-3 p-3 hover:bg-[#EDF2F7] transition-colors">

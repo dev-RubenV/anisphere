@@ -38,7 +38,7 @@ export function NavMenu() {
     return (
         <header className="glass sticky top-4 z-50 mx-auto w-[95%] max-w-6xl rounded-3xl border border-[#DCC1B1]/30 shadow-sm">
             <div className="container flex items-center justify-between gap-4 py-3 px-4 md:px-8 max-w-7xl mx-auto">
-                {/* Logo / Brand */}
+                {/* Logo / Marca */}
                 <div className="flex items-center shrink-0">
                     <Link href="/">
                         <Button
@@ -55,12 +55,12 @@ export function NavMenu() {
                     </Link>
                 </div>
 
-                {/* Search bar — hidden on mobile, shown on desktop */}
+                {/* Barra de pesquisa — escondida em mobile, visível em desktop */}
                 <div className="hidden md:flex flex-1 max-w-md mx-auto">
                     <AnimeSearch />
                 </div>
 
-                {/* Desktop user area */}
+                {/* Área de utilizador no desktop */}
                 <div className="hidden md:flex items-center justify-end gap-3">
                     {!user ? (
                         <Button
@@ -103,7 +103,7 @@ export function NavMenu() {
                     )}
                 </div>
 
-                {/* Mobile menu button */}
+                {/* Botão do menu mobile */}
                 <button
                     className="md:hidden p-2 rounded-lg hover:bg-[#EDF2F7] transition-colors text-[#1A202E]"
                     onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -113,10 +113,10 @@ export function NavMenu() {
                 </button>
             </div>
 
-            {/* Mobile menu dropdown */}
+            {/* Menu dropdown mobile */}
             {mobileMenuOpen && (
                 <div className="md:hidden border-t border-[#E6E8EA] bg-white/95 backdrop-blur-md px-4 pb-4 pt-3 space-y-3 animate-in slide-in-from-top-2 duration-200 rounded-xl">
-                    {/* Mobile search */}
+                    {/* Pesquisa mobile */}
                     <div className="w-full">
                         <AnimeSearch />
                     </div>

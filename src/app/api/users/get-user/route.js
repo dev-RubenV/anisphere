@@ -2,9 +2,9 @@ import clientPromise from "@/lib/mongodb";
 import { NextResponse } from "next/server";
 import { escapeRegExp } from "@/lib/utils";
 
-// 1. MUST be named GET (not getUser)
+// 1. TEM de se chamar GET (não getUser)
 export async function GET(request) {
-    // 2. Extract the username from the URL (e.g., /api/users/get-user?query=username)
+    // 2. Extrai o username do URL (ex: /api/users/get-user?query=username)
     const { searchParams } = new URL(request.url);
     const query = searchParams.get("query");
 
@@ -17,7 +17,7 @@ export async function GET(request) {
         const db = client.db("anisphere");
         const usersCollection = await db.collection("users");
 
-        // 3. Use findOne() to get the actual user object, not a cursor
+        // 3. Usa findOne() para obter o objeto do utilizador, não um cursor
         // Escape de regex para prevenir ReDoS
         const safeQuery = escapeRegExp(query);
         const user = await usersCollection.findOne(
@@ -41,7 +41,7 @@ export async function GET(request) {
             return NextResponse.json({ error: "User not found" }, { status: 404 });
         }
 
-        // 4. Return as JSON
+        // 4. Retorna como JSON
         return NextResponse.json(user, { status: 200 });
 
     } catch (error) {
